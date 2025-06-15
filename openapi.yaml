@@ -1,0 +1,1341 @@
+openapi: 3.0.3
+info:
+  title: Datacom Payment Gateway (DPG) REST API
+  description: |
+    # Datacom Payment Gateway API v1.0
+    
+    The Datacom Payment Gateway (DPG) REST API provides comprehensive payment processing capabilities for merchants who need to integrate payment functionality into their applications.
+    
+    ## Overview
+    
+    The DPG API supports a wide range of payment operations including:
+    - Payment processing with card details or tokens
+    - Transaction generation for hosted payment pages
+    - Refunds and voids
+    - Authorization and capture workflows
+    - Card tokenization for secure recurring payments
+    - Transaction status inquiries and reporting
+    
+    ## Authentication
+    
+    All API endpoints require authentication using merchant credentials:
+    - **UserName**: Your merchant username
+    - **Password**: Your merchant password
+    - **MerchantNumber**: Your assigned merchant identifier
+    
+    These credentials must be included in the request body for each API call.
+    
+    ## Base URL
+    
+    **Production**: `https://your-dpg-domain.com/api/payments/v1.0`
+    **Testing**: Contact Datacom for testing environment details
+    
+    ## Error Handling
+    
+    The API uses standard HTTP status codes and returns detailed error information in the response body. Common error codes include:
+    - `200` - Success
+    - `400` - Bad Request (validation errors)
+    - `401` - Unauthorized (authentication failure)
+    - `404` - Not Found (transaction not found)
+    - `500` - Internal Server Error
+    
+    ## Integration Support
+    
+    For integration assistance, contact the Datacom Payment Gateway support team.
+    
+  version: 1.0.0
+  contact:
+    name: Datacom Payment Gateway Support
+    url: https://www.datacom.com
+    email: support@datacom.com
+  license:
+    name: Proprietary
+    url: https://www.datacom.com/terms
+servers:
+  - url: https://your-dpg-domain.com/api/payments/v1.0
+    description: Production server
+  - url: https://test-dpg-domain.com/api/payments/v1.0
+    description: Testing server
+
+paths:
+  /processpayment:
+    post:
+      tags:
+        - Payment Processing
+      summary: Process Card Payment
+      description: |
+        Process a direct payment using card details. This endpoint allows you to charge a customer's card immediately.
+        
+        **Important Notes:**
+        - Card details are processed securely
+        - PCI DSS compliance may be required for direct card processing
+        - Consider using tokenization for recurring payments
+        
+        **Use Cases:**
+        - Direct card payments
+        - One-time transactions
+        - E-commerce checkout
+      operationId: processPayment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcessPayment'
+            example:
+              MerchantNumber: "TESTDC00018"
+              UserName: "DatacomTestUserName"
+              Password: "jPSf1ywbQPiKtJ163FvS"
+              InputCurrency: "NZD"
+              MerchantAccessCode: "9a00eee606b948b06676c8d3af00c5a5"
+              OrderInfo: "Test-abc123456789"
+              TransAmount: 1.00
+              Card:
+                cardName: "Any"
+                cardNumber: "5123450000000008"
+                cardExpiry: "0139"
+                cscCode: "100"
+      responses:
+        '200':
+          description: Payment processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIPaymentResponse'
+        '400':
+          description: Bad request - validation errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIPaymentResponse'
+        '401':
+          description: Unauthorized - authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIPaymentResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIPaymentResponse'
+
+  /generatetransaction:
+    post:
+      tags:
+        - Hosted Payments
+      summary: Generate Hosted Payment Transaction
+      description: |
+        Generate a hosted payment transaction that redirects customers to a secure payment page.
+        
+        This is the recommended approach for merchants who want to minimize PCI DSS compliance requirements
+        while providing a seamless payment experience.
+        
+        **Features:**
+        - Secure hosted payment page
+        - Reduced PCI DSS compliance scope
+        - Customizable success/failure URLs
+        - Mobile-responsive payment forms
+        
+        **Process:**
+        1. Call this endpoint to generate a transaction
+        2. Redirect customer to the returned payment URL
+        3. Customer completes payment on hosted page
+        4. Customer is redirected back to your success/failure URL
+        5. Use transaction lookup endpoints to verify payment status
+      operationId: generateTransaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateTransaction'
+            example:
+              MerchantNumber: "TESTDC00018"
+              UserName: "DatacomTestUserName"
+              Password: "jPSf1ywbQPiKtJ163FvS"
+              InputCurrency: "NZD"
+              MerchantAccessCode: "9a00eee606b948b06676c8d3af00c5a5"
+              OrderInfo: "Test-abc123456789"
+              TransAmount: 1.00
+              PaymentMode: "INTERNET"
+              Locale: "en"
+              TransSource: "WebsiteCheckout"
+              MerchantSuccessUrl: "https://yoursite.com/payment/success"
+              MerchantFailUrl: "https://yoursite.com/payment/failure"
+              PaymentType: "StandardPay"
+      responses:
+        '201':
+          description: Transaction generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAPIGenerateTransactionResponse'
+        '400':
+          description: Bad request - validation errors
+        '401':
+          description: Unauthorized - authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAPIGenerateTransactionResponse'
+
+  /gettransactiondetails:
+    post:
+      tags:
+        - Transaction Management
+      summary: Get Transaction Details
+      description: |
+        Retrieve detailed information about a specific transaction using its transaction reference.
+        
+        **Use Cases:**
+        - Verify payment completion after hosted payment
+        - Get transaction status for reconciliation
+        - Retrieve payment details for customer service
+        - Check transaction authentication results
+        
+        **Response includes:**
+        - Transaction status and amounts
+        - Card details (masked)
+        - Authentication information (3DS)
+        - Timestamps and references
+      operationId: getTransactionDetails
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetTransactionDetails'
+            example:
+              transactionReference: "36C4A4C2B8CD49A4BEDD3CD123DED01E"
+              merchantNumber: "TESTDC00018"
+              UserName: "DatacomTestUserName"
+              Password: "jPSf1ywbQPiKtJ163FvS"
+      responses:
+        '200':
+          description: Transaction details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIPaymentResponse'
+        '401':
+          description: Unauthorized - authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIPaymentResponse'
+        '404':
+          description: Transaction not found
+
+  /gettransactions:
+    post:
+      tags:
+        - Transaction Management
+      summary: Get Paginated Transaction List
+      description: |
+        Retrieve a paginated list of transactions with optional filtering and sorting.
+        
+        **Features:**
+        - Pagination support (up to 1000 records per page)
+        - Date range filtering
+        - Amount range filtering
+        - Sortable by multiple columns
+        - Merchant-specific results
+        
+        **Use Cases:**
+        - Transaction reporting and reconciliation
+        - Building transaction history pages
+        - Financial reporting integration
+        - Batch transaction processing
+      operationId: getTransactions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetTransactions'
+            example:
+              merchantNumber: "TESTDC00018"
+              username: "DatacomTestUserName"
+              password: "jPSf1ywbQPiKtJ163FvS"
+              pageSize: 10
+              pageNumber: 1
+              sortColumn: "TransAmount"
+              sortDescending: true
+              minimumAmount: 50
+              maximumAmount: 200
+              fromStartDate: "2022-11-30T02:39:07.625Z"
+              toStartDate: "2023-11-30T02:39:07.625Z"
+      responses:
+        '200':
+          description: Transaction list retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIPaginatedTransactionsResponse'
+        '400':
+          description: Bad request - validation errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIPaginatedTransactionsResponse'
+        '401':
+          description: Unauthorized - authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIPaginatedTransactionsResponse'
+
+  /processrefund:
+    post:
+      tags:
+        - Refunds
+      summary: Process Refund
+      description: |
+        Process a refund against a previously successful payment transaction.
+        
+        **Important Notes:**
+        - Refunds can only be processed against successful payments
+        - Partial refunds are supported
+        - Multiple partial refunds can be processed up to the original amount
+        - Refund processing may take 3-5 business days to appear on customer statements
+        
+        **Requirements:**
+        - Original transaction reference is required
+        - Refund amount cannot exceed remaining refundable amount
+        - Merchant must have refund permissions enabled
+      operationId: processRefund
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcessRefund'
+            example:
+              InputCurrency: "NZD"
+              MerchantAccessCode: "9a00eee606b948b06676c8d3af00c5a5"
+              MerchantNumber: "TESTDC00018"
+              UserName: "DatacomTestUserName"
+              Password: "jPSf1ywbQPiKtJ163FvS"
+              OrderInfo: "Refund-abc123456789"
+              TransAmount: 1.00
+              paymentTransactionReference: "36C4A4C2B8CD49A4BEDD3CD123DED01E"
+      responses:
+        '200':
+          description: Refund processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIPaymentResponse'
+        '400':
+          description: Bad request - validation errors
+        '401':
+          description: Unauthorized - authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIPaymentResponse'
+
+  /processauthorisation:
+    post:
+      tags:
+        - Authorization & Capture
+      summary: Process Authorization
+      description: |
+        Create a payment authorization (pre-auth) that reserves funds on a customer's card without capturing them.
+        
+        **Authorization Process:**
+        1. Funds are reserved on the customer's card
+        2. No money is transferred immediately
+        3. Authorization must be captured within a specified timeframe (typically 7-30 days)
+        4. Uncaptured authorizations will automatically void
+        
+        **Use Cases:**
+        - Hotel reservations
+        - Car rentals
+        - Delayed fulfillment orders
+        - Pre-order scenarios
+        
+        **Next Steps:**
+        - Use `/processcapture` to capture the authorized amount
+        - Use `/processvoid` to cancel the authorization
+      operationId: processAuthorisation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcessAuthorisation'
+            example:
+              InputCurrency: "NZD"
+              MerchantAccessCode: "9a00eee606b948b06676c8d3af00c5a5"
+              MerchantNumber: "TESTDC00018"
+              AuthAmounts: "10,20,30"
+              UserName: "DatacomTestUserName"
+              Password: "jPSf1ywbQPiKtJ163FvS"
+              OrderInfo: "Auth-abc123456789"
+              TransAmount: 1.00
+              Token:
+                token: "6729011452840008"
+      responses:
+        '200':
+          description: Authorization processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIPaymentResponse'
+        '400':
+          description: Bad request - validation errors
+
+  /processcapture:
+    post:
+      tags:
+        - Authorization & Capture
+      summary: Capture Authorization
+      description: |
+        Capture a previously authorized payment to complete the transaction and transfer funds.
+        
+        **Important Notes:**
+        - Can only capture previously authorized transactions
+        - Capture amount can be less than or equal to authorized amount
+        - Partial captures are supported
+        - Authorization expires after a certain period (bank-dependent)
+        
+        **Requirements:**
+        - Original authorization transaction reference
+        - Capture amount within authorized limits
+      operationId: processCapture
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcessCapture'
+            example:
+              InputCurrency: "NZD"
+              MerchantAccessCode: "9a00eee606b948b06676c8d3af00c5a5"
+              MerchantNumber: "TESTDC00018"
+              TransAmount: 1.00
+              UserName: "DatacomTestUserName"
+              Password: "jPSf1ywbQPiKtJ163FvS"
+              OrderInfo: "Capture-abc123456789"
+              AuthTransactionReference: "36C4A4C2B8CD49A4BEDD3CD123DED01E"
+      responses:
+        '200':
+          description: Capture processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIPaymentResponse'
+        '400':
+          description: Bad request - validation errors
+
+  /processvoid:
+    post:
+      tags:
+        - Authorization & Capture
+      summary: Void Authorization
+      description: |
+        Void (cancel) a previously authorized payment to release the reserved funds.
+        
+        **Important Notes:**
+        - Can only void authorized transactions that haven't been captured
+        - Voiding releases the hold on customer's funds immediately
+        - Cannot void captured or settled transactions (use refund instead)
+        
+        **Use Cases:**
+        - Cancel hotel reservations
+        - Cancel car rental bookings
+        - Cancel pre-orders
+        - Release accidental authorizations
+      operationId: processVoid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcessVoid'
+            example:
+              InputCurrency: "NZD"
+              MerchantAccessCode: "9a00eee606b948b06676c8d3af00c5a5"
+              MerchantNumber: "TESTDC00018"
+              UserName: "DatacomTestUserName"
+              Password: "jPSf1ywbQPiKtJ163FvS"
+              OrderInfo: "Void-abc123456789"
+              AuthTransactionReference: "36C4A4C2B8CD49A4BEDD3CD123DED01E"
+      responses:
+        '200':
+          description: Void processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIPaymentResponse'
+        '400':
+          description: Bad request - validation errors
+
+  /processtokenisecard:
+    post:
+      tags:
+        - Tokenization
+      summary: Tokenize Card Details
+      description: |
+        Securely tokenize card details for future use without storing sensitive card information.
+        
+        **Tokenization Benefits:**
+        - Reduces PCI DSS compliance scope
+        - Enables secure recurring payments
+        - Protects sensitive card data
+        - Improves customer experience for repeat purchases
+        
+        **Process:**
+        1. Submit card details for tokenization
+        2. Receive secure token in response
+        3. Store token for future transactions
+        4. Use token with other payment endpoints
+        
+        **Security:**
+        - Original card data is not stored by your system
+        - Tokens are unique and cannot be reversed
+        - Tokens can be configured to expire
+      operationId: processTokeniseCard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcessTokeniseCard'
+            example:
+              InputCurrency: "NZD"
+              MerchantAccessCode: "9a00eee606b948b06676c8d3af00c5a5"
+              MerchantNumber: "TESTDC00018"
+              UserName: "DatacomTestUserName"
+              Password: "jPSf1ywbQPiKtJ163FvS"
+              OrderInfo: "Tokenize-abc123456789"
+              Card:
+                cardName: "Any"
+                cardNumber: "5123450000000008"
+                cardExpiry: "0139"
+                cscCode: "100"
+      responses:
+        '200':
+          description: Card tokenized successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIPaymentResponse'
+        '400':
+          description: Bad request - validation errors
+
+components:
+  schemas:
+    ProcessPayment:
+      type: object
+      required:
+        - MerchantNumber
+        - UserName
+        - Password
+        - InputCurrency
+        - MerchantAccessCode
+        - OrderInfo
+        - TransAmount
+      properties:
+        MerchantNumber:
+          type: string
+          description: Merchant identifier assigned by Datacom
+          example: "TESTDC00018"
+        UserName:
+          type: string
+          description: Merchant username for authentication
+          example: "DatacomTestUserName"
+        Password:
+          type: string
+          description: Merchant password for authentication
+          format: password
+          example: "jPSf1ywbQPiKtJ163FvS"
+        InputCurrency:
+          type: string
+          description: Transaction currency code (ISO 4217)
+          example: "NZD"
+          enum: ["NZD", "AUD", "USD", "EUR", "GBP"]
+        MerchantAccessCode:
+          type: string
+          description: Merchant access code for additional security
+          example: "9a00eee606b948b06676c8d3af00c5a5"
+        OrderInfo:
+          type: string
+          description: Merchant order reference (should be unique)
+          example: "Order-123456789"
+        TransAmount:
+          type: number
+          format: decimal
+          description: Transaction amount in specified currency
+          minimum: 0.01
+          example: 1.00
+        PaymentMode:
+          type: string
+          description: Payment mode
+          example: "INTERNET"
+        PaymentType:
+          type: string
+          description: Type of payment processing
+          example: "StandardPay"
+        Card:
+          $ref: '#/components/schemas/Card'
+        Token:
+          $ref: '#/components/schemas/Token'
+        BillingAddress:
+          $ref: '#/components/schemas/Address'
+        ShippingAddress:
+          $ref: '#/components/schemas/Address'
+        CustomerDetails:
+          $ref: '#/components/schemas/Customer'
+        ClientTransData1:
+          type: string
+          description: Custom transaction data field 1
+        ClientTransData2:
+          type: string
+          description: Custom transaction data field 2
+        ClientTransData3:
+          type: string
+          description: Custom transaction data field 3
+        ClientTransData4:
+          type: string
+          description: Custom transaction data field 4
+        ClientTransData5:
+          type: string
+          description: Custom transaction data field 5
+        ThreeDSCheckRule:
+          type: string
+          description: 3D Secure check rule
+
+    GenerateTransaction:
+      type: object
+      required:
+        - MerchantNumber
+        - UserName
+        - Password
+        - InputCurrency
+        - MerchantAccessCode
+        - OrderInfo
+        - TransAmount
+        - PaymentMode
+        - MerchantSuccessUrl
+        - MerchantFailUrl
+      properties:
+        MerchantNumber:
+          type: string
+          description: Merchant identifier assigned by Datacom
+          example: "TESTDC00018"
+        UserName:
+          type: string
+          description: Merchant username for authentication
+          example: "DatacomTestUserName"
+        Password:
+          type: string
+          description: Merchant password for authentication
+          format: password
+          example: "jPSf1ywbQPiKtJ163FvS"
+        InputCurrency:
+          type: string
+          description: Transaction currency code (ISO 4217)
+          example: "NZD"
+        MerchantAccessCode:
+          type: string
+          description: Merchant access code for additional security
+          example: "9a00eee606b948b06676c8d3af00c5a5"
+        OrderInfo:
+          type: string
+          description: Merchant order reference (should be unique)
+          example: "Order-123456789"
+        TransAmount:
+          type: number
+          format: decimal
+          description: Transaction amount in specified currency
+          minimum: 0.01
+          example: 1.00
+        PaymentMode:
+          type: string
+          description: Payment mode for the transaction
+          example: "INTERNET"
+          enum: ["INTERNET", "MOTO", "RECURRING"]
+        Locale:
+          type: string
+          description: Language locale for payment page
+          example: "en"
+          enum: ["en", "fr", "de", "es"]
+        TransSource:
+          type: string
+          description: Source of the transaction
+          example: "WebsiteCheckout"
+        MerchantSuccessUrl:
+          type: string
+          format: uri
+          description: URL to redirect customer after successful payment
+          example: "https://yoursite.com/payment/success"
+        MerchantFailUrl:
+          type: string
+          format: uri
+          description: URL to redirect customer after failed payment
+          example: "https://yoursite.com/payment/failure"
+        MerchantRedirectUrl:
+          type: string
+          format: uri
+          description: General redirect URL
+        PaymentType:
+          type: string
+          description: Type of payment processing
+          example: "StandardPay"
+        BillingAddress:
+          $ref: '#/components/schemas/Address'
+        ShippingAddress:
+          $ref: '#/components/schemas/Address'
+        CustomerDetails:
+          $ref: '#/components/schemas/Customer'
+        ThreeDSCheckRule:
+          type: string
+          description: 3D Secure check rule
+
+    GetTransactionDetails:
+      type: object
+      required:
+        - transactionReference
+        - merchantNumber
+        - UserName
+        - Password
+      properties:
+        transactionReference:
+          type: string
+          description: Unique transaction reference to look up
+          example: "36C4A4C2B8CD49A4BEDD3CD123DED01E"
+        merchantNumber:
+          type: string
+          description: Merchant identifier
+          example: "TESTDC00018"
+        UserName:
+          type: string
+          description: Merchant username for authentication
+          example: "DatacomTestUserName"
+        Password:
+          type: string
+          description: Merchant password for authentication
+          format: password
+          example: "jPSf1ywbQPiKtJ163FvS"
+
+    GetTransactions:
+      type: object
+      required:
+        - merchantNumber
+        - username
+        - password
+        - pageSize
+        - pageNumber
+      properties:
+        merchantNumber:
+          type: string
+          description: Merchant identifier
+          example: "TESTDC00018"
+        username:
+          type: string
+          description: Merchant username for authentication
+          example: "DatacomTestUserName"
+        password:
+          type: string
+          description: Merchant password for authentication
+          format: password
+          example: "jPSf1ywbQPiKtJ163FvS"
+        pageSize:
+          type: integer
+          description: Number of records per page (1-1000)
+          minimum: 1
+          maximum: 1000
+          example: 10
+        pageNumber:
+          type: integer
+          description: Page number to retrieve (1-based)
+          minimum: 1
+          example: 1
+        sortColumn:
+          type: string
+          description: Column to sort by
+          example: "TransAmount"
+        sortDescending:
+          type: boolean
+          description: Sort in descending order
+          example: true
+        minimumAmount:
+          type: number
+          format: decimal
+          description: Minimum transaction amount filter
+          example: 50.00
+        maximumAmount:
+          type: number
+          format: decimal
+          description: Maximum transaction amount filter
+          example: 200.00
+        fromStartDate:
+          type: string
+          format: date-time
+          description: Start date filter (ISO 8601)
+          example: "2022-11-30T02:39:07.625Z"
+        toStartDate:
+          type: string
+          format: date-time
+          description: End date filter (ISO 8601)
+          example: "2023-11-30T02:39:07.625Z"
+
+    ProcessRefund:
+      type: object
+      required:
+        - paymentTransactionReference
+        - MerchantNumber
+        - UserName
+        - Password
+        - InputCurrency
+        - MerchantAccessCode
+        - OrderInfo
+        - TransAmount
+      properties:
+        paymentTransactionReference:
+          type: string
+          description: Reference of the original payment transaction to refund
+          example: "36C4A4C2B8CD49A4BEDD3CD123DED01E"
+        MerchantNumber:
+          type: string
+          description: Merchant identifier
+          example: "TESTDC00018"
+        UserName:
+          type: string
+          description: Merchant username for authentication
+          example: "DatacomTestUserName"
+        Password:
+          type: string
+          description: Merchant password for authentication
+          format: password
+          example: "jPSf1ywbQPiKtJ163FvS"
+        InputCurrency:
+          type: string
+          description: Transaction currency code (ISO 4217)
+          example: "NZD"
+        MerchantAccessCode:
+          type: string
+          description: Merchant access code
+          example: "9a00eee606b948b06676c8d3af00c5a5"
+        OrderInfo:
+          type: string
+          description: Refund order reference
+          example: "Refund-123456789"
+        TransAmount:
+          type: number
+          format: decimal
+          description: Refund amount (cannot exceed remaining refundable amount)
+          minimum: 0.01
+          example: 1.00
+
+    ProcessAuthorisation:
+      type: object
+      required:
+        - MerchantNumber
+        - UserName
+        - Password
+        - InputCurrency
+        - MerchantAccessCode
+        - OrderInfo
+        - TransAmount
+      properties:
+        MerchantNumber:
+          type: string
+          description: Merchant identifier
+          example: "TESTDC00018"
+        UserName:
+          type: string
+          description: Merchant username for authentication
+          example: "DatacomTestUserName"
+        Password:
+          type: string
+          description: Merchant password for authentication
+          format: password
+          example: "jPSf1ywbQPiKtJ163FvS"
+        InputCurrency:
+          type: string
+          description: Transaction currency code (ISO 4217)
+          example: "NZD"
+        MerchantAccessCode:
+          type: string
+          description: Merchant access code
+          example: "9a00eee606b948b06676c8d3af00c5a5"
+        OrderInfo:
+          type: string
+          description: Authorization order reference
+          example: "Auth-123456789"
+        TransAmount:
+          type: number
+          format: decimal
+          description: Authorization amount
+          minimum: 0.01
+          example: 1.00
+        AuthAmounts:
+          type: string
+          description: Comma-separated authorization amounts
+          example: "10,20,30"
+        Card:
+          $ref: '#/components/schemas/Card'
+        Token:
+          $ref: '#/components/schemas/Token'
+
+    ProcessCapture:
+      type: object
+      required:
+        - AuthTransactionReference
+        - MerchantNumber
+        - UserName
+        - Password
+        - InputCurrency
+        - MerchantAccessCode
+        - OrderInfo
+        - TransAmount
+      properties:
+        AuthTransactionReference:
+          type: string
+          description: Reference of the authorization transaction to capture
+          example: "36C4A4C2B8CD49A4BEDD3CD123DED01E"
+        MerchantNumber:
+          type: string
+          description: Merchant identifier
+          example: "TESTDC00018"
+        UserName:
+          type: string
+          description: Merchant username for authentication
+          example: "DatacomTestUserName"
+        Password:
+          type: string
+          description: Merchant password for authentication
+          format: password
+          example: "jPSf1ywbQPiKtJ163FvS"
+        InputCurrency:
+          type: string
+          description: Transaction currency code (ISO 4217)
+          example: "NZD"
+        MerchantAccessCode:
+          type: string
+          description: Merchant access code
+          example: "9a00eee606b948b06676c8d3af00c5a5"
+        OrderInfo:
+          type: string
+          description: Capture order reference
+          example: "Capture-123456789"
+        TransAmount:
+          type: number
+          format: decimal
+          description: Capture amount (cannot exceed authorized amount)
+          minimum: 0.01
+          example: 1.00
+
+    ProcessVoid:
+      type: object
+      required:
+        - AuthTransactionReference
+        - MerchantNumber
+        - UserName
+        - Password
+        - InputCurrency
+        - MerchantAccessCode
+        - OrderInfo
+      properties:
+        AuthTransactionReference:
+          type: string
+          description: Reference of the authorization transaction to void
+          example: "36C4A4C2B8CD49A4BEDD3CD123DED01E"
+        MerchantNumber:
+          type: string
+          description: Merchant identifier
+          example: "TESTDC00018"
+        UserName:
+          type: string
+          description: Merchant username for authentication
+          example: "DatacomTestUserName"
+        Password:
+          type: string
+          description: Merchant password for authentication
+          format: password
+          example: "jPSf1ywbQPiKtJ163FvS"
+        InputCurrency:
+          type: string
+          description: Transaction currency code (ISO 4217)
+          example: "NZD"
+        MerchantAccessCode:
+          type: string
+          description: Merchant access code
+          example: "9a00eee606b948b06676c8d3af00c5a5"
+        OrderInfo:
+          type: string
+          description: Void order reference
+          example: "Void-123456789"
+
+    ProcessTokeniseCard:
+      type: object
+      required:
+        - MerchantNumber
+        - UserName
+        - Password
+        - InputCurrency
+        - MerchantAccessCode
+        - OrderInfo
+        - Card
+      properties:
+        MerchantNumber:
+          type: string
+          description: Merchant identifier
+          example: "TESTDC00018"
+        UserName:
+          type: string
+          description: Merchant username for authentication
+          example: "DatacomTestUserName"
+        Password:
+          type: string
+          description: Merchant password for authentication
+          format: password
+          example: "jPSf1ywbQPiKtJ163FvS"
+        InputCurrency:
+          type: string
+          description: Transaction currency code (ISO 4217)
+          example: "NZD"
+        MerchantAccessCode:
+          type: string
+          description: Merchant access code
+          example: "9a00eee606b948b06676c8d3af00c5a5"
+        OrderInfo:
+          type: string
+          description: Tokenization order reference
+          example: "Token-123456789"
+        Card:
+          $ref: '#/components/schemas/Card'
+
+    Card:
+      type: object
+      required:
+        - cardNumber
+        - cardExpiry
+      properties:
+        cardName:
+          type: string
+          description: Cardholder name
+          example: "John Doe"
+        cardNumber:
+          type: string
+          description: Card number (13-19 digits)
+          pattern: '^[0-9]{13,19}$'
+          example: "5123450000000008"
+        cardExpiry:
+          type: string
+          description: Card expiry date (MMYY format)
+          pattern: '^[0-9]{4}$'
+          example: "0139"
+        cscCode:
+          type: string
+          description: Card security code (CVV/CVC)
+          pattern: '^[0-9]{3,4}$'
+          example: "100"
+        TokeniseCard:
+          type: boolean
+          description: Whether to tokenize this card for future use
+          example: true
+
+    Token:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: Secure card token for payments
+          example: "6729011452840008"
+        tokenType:
+          type: string
+          description: Type of token
+          example: "card"
+
+    Address:
+      type: object
+      properties:
+        Street:
+          type: string
+          description: Street address line 1
+          example: "123 Main Street"
+        Street2:
+          type: string
+          description: Street address line 2
+          example: "Suite 100"
+        City:
+          type: string
+          description: City name
+          example: "Auckland"
+        StateProvince:
+          type: string
+          description: State or province name
+          example: "Auckland"
+        StateProvinceCode:
+          type: string
+          description: State or province code
+          example: "AUK"
+        PostcodeZip:
+          type: string
+          description: Postal or ZIP code
+          example: "1010"
+        Country:
+          type: string
+          description: Country name
+          example: "New Zealand"
+        Company:
+          type: string
+          description: Company name
+          example: "ACME Corp"
+
+    Customer:
+      type: object
+      properties:
+        FirstName:
+          type: string
+          description: Customer first name
+          example: "John"
+        LastName:
+          type: string
+          description: Customer last name
+          example: "Doe"
+        Email:
+          type: string
+          format: email
+          description: Customer email address
+          example: "john.doe@example.com"
+        Phone:
+          type: string
+          description: Customer phone number
+          example: "+64 9 123 4567"
+        MobilePhone:
+          type: string
+          description: Customer mobile phone number
+          example: "+64 21 123 4567"
+        DateOfBirth:
+          type: string
+          format: date
+          description: Customer date of birth
+          example: "1980-01-01"
+        NationalId:
+          type: string
+          description: Customer national ID or passport number
+          example: "AB123456"
+
+    APIPaymentResponse:
+      type: object
+      properties:
+        TransactionReference:
+          type: string
+          description: Unique transaction reference
+          example: "36C4A4C2B8CD49A4BEDD3CD123DED01E"
+        TransStatusCode:
+          type: string
+          description: Transaction status code
+          example: "0"
+        TransactionType:
+          type: string
+          description: Type of transaction processed
+          example: "Payment"
+        TokenMethod:
+          type: string
+          description: Token method used
+          example: "None"
+        PaymentType:
+          type: string
+          description: Payment type
+          example: "StandardPay"
+        ProductType:
+          type: string
+          description: Product type
+          example: "Standard"
+        TransAmount:
+          type: number
+          format: decimal
+          description: Transaction amount
+          example: 1.00
+        InputCurrency:
+          type: string
+          description: Transaction currency
+          example: "NZD"
+        OrderInfo:
+          type: string
+          description: Order information
+          example: "Order-123456789"
+        MerchantNumber:
+          type: string
+          description: Merchant identifier
+          example: "TESTDC00018"
+        TransactionTime:
+          type: string
+          format: date-time
+          description: Transaction processing time
+          example: "2023-01-01T12:00:00Z"
+        DPGErrorCode:
+          type: string
+          description: DPG-specific error code
+          example: "0"
+        DPGErrorDescription:
+          type: string
+          description: DPG-specific error description
+          example: "Success"
+        AuthenticationPayerInteraction:
+          type: string
+          description: 3DS payer interaction status
+        AuthenticationStatus:
+          type: string
+          description: 3DS authentication status
+        AuthenticationAcsEci:
+          type: string
+          description: 3DS ECI value
+        AuthenticationStatusFlag:
+          type: string
+          description: 3DS status flag
+        AuthenticationGatewayRecommendation:
+          type: string
+          description: 3DS gateway recommendation
+        CardFundingMethod:
+          type: string
+          description: Card funding method (debit/credit)
+        Token:
+          type: string
+          description: Generated token (for tokenization requests)
+          example: "6729011452840008"
+
+    RestAPIGenerateTransactionResponse:
+      type: object
+      properties:
+        TransactionReference:
+          type: string
+          description: Generated transaction reference
+          example: "36C4A4C2B8CD49A4BEDD3CD123DED01E"
+        PaymentUrl:
+          type: string
+          format: uri
+          description: URL for customer to complete payment
+          example: "https://payments.dpg.com/hosted/?ref=36C4A4C2B8CD49A4BEDD3CD123DED01E"
+        DPGErrorCode:
+          type: string
+          description: Error code (0 = success)
+          example: "0"
+        DPGErrorDescription:
+          type: string
+          description: Error description
+          example: "Success"
+
+    APIPaginatedTransactionsResponse:
+      type: object
+      properties:
+        Data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaginatedTransactionDetails'
+        PageSize:
+          type: integer
+          description: Number of records per page
+          example: 10
+        PageNumber:
+          type: integer
+          description: Current page number
+          example: 1
+        TotalRowCount:
+          type: integer
+          description: Total number of records available
+          example: 150
+        DPGErrorCode:
+          type: string
+          description: Error code (0 = success)
+          example: "0"
+        DPGErrorDescription:
+          type: string
+          description: Error description
+          example: "Success"
+
+    PaginatedTransactionDetails:
+      type: object
+      properties:
+        TransactionReference:
+          type: string
+          description: Transaction reference
+          example: "36C4A4C2B8CD49A4BEDD3CD123DED01E"
+        TransAmount:
+          type: number
+          format: decimal
+          description: Transaction amount
+          example: 1.00
+        InputCurrency:
+          type: string
+          description: Transaction currency
+          example: "NZD"
+        OrderInfo:
+          type: string
+          description: Order information
+          example: "Order-123456789"
+        TransactionTime:
+          type: string
+          format: date-time
+          description: Transaction time
+          example: "2023-01-01T12:00:00Z"
+        TransStatusCode:
+          type: string
+          description: Transaction status code
+          example: "0"
+        TransactionType:
+          type: string
+          description: Transaction type
+          example: "Payment"
+        PaymentType:
+          type: string
+          description: Payment type
+          example: "StandardPay"
+
+  securitySchemes:
+    MerchantAuth:
+      type: http
+      scheme: basic
+      description: |
+        Merchant authentication using username and password.
+        Note: In practice, credentials are passed in the request body rather than HTTP headers.
+
+tags:
+  - name: Payment Processing
+    description: |
+      Direct payment processing operations for immediate transaction completion.
+      These endpoints charge the customer's payment method immediately.
+  - name: Hosted Payments
+    description: |
+      Hosted payment page generation for secure, PCI-compliant payment processing.
+      Customers are redirected to secure payment pages hosted by DPG.
+  - name: Transaction Management
+    description: |
+      Transaction inquiry and management operations for retrieving transaction
+      details and generating reports.
+  - name: Refunds
+    description: |
+      Refund processing operations for returning funds to customers from
+      previously successful transactions.
+  - name: Authorization & Capture
+    description: |
+      Two-phase payment processing where funds are first authorized (reserved)
+      and then captured (charged) at a later time.
+  - name: Tokenization
+    description: |
+      Secure tokenization services for storing payment methods without handling
+      sensitive card data directly.
+
+x-tagGroups:
+  - name: Core Payment Operations
+    tags:
+      - Payment Processing
+      - Hosted Payments
+  - name: Transaction Management
+    tags:
+      - Transaction Management
+      - Refunds
+  - name: Advanced Features
+    tags:
+      - Authorization & Capture
+      - Tokenization 
