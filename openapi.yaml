@@ -3,9 +3,7 @@ info:
   title: Datacom Payment Gateway (DPG) REST API
   description: |
     # Datacom Payment Gateway API v1.0
-    
-    The Datacom Payment Gateway (DPG) REST API provides comprehensive payment processing capabilities for merchants who need to integrate payment functionality into their applications.
-    
+  
     ## Overview
     
     The DPG API supports a wide range of payment operations including:
@@ -15,6 +13,168 @@ info:
     - Authorization and capture workflows
     - Card tokenization for secure recurring payments
     - Transaction status inquiries and reporting
+    
+    ## Payment Page Integration
+    
+    ### Overview
+    The DPG Payment Page provides a secure, PCI-compliant hosted payment solution that minimizes the compliance burden on merchants while delivering a seamless payment experience for customers.
+    
+    ### How the Payment Page Functions
+    
+    ![DPG Payment Page](./dpg-payment-page-screenshot.png "DPG Hosted Payment Page Interface")
+    
+    *The DPG hosted payment page provides a secure, user-friendly interface for collecting payment details with real-time validation and 3D Secure support.*
+    
+    #### 1. Payment Page Architecture
+    The payment page is implemented through the `ProcessCreditCard.aspx` component which handles:
+    - Secure collection of payment card details
+    - Real-time payment processing
+    - 3D Secure authentication when required
+    - Transaction result handling and customer redirection
+    - Integration with multiple payment processors
+    
+    #### 2. Integration Process
+    
+    **Step 1: Generate Transaction**
+    Use the [Generate Hosted Payment Transaction](#operation/generateTransaction) endpoint:
+    - Create a payment transaction with amount, currency, and merchant details
+    - Specify success and failure redirect URLs
+    - Receive a transaction reference and payment URL
+    
+    **Step 2: Customer Redirection**
+    - Redirect the customer to the returned `PaymentUrl`
+    - Customer is presented with a secure payment form
+    - Form is mobile-responsive and supports multiple languages
+    
+    **Step 3: Payment Processing**
+    - Customer enters card details on the hosted payment page
+    - Payment page validates card information in real-time
+    - 3D Secure authentication is triggered when required
+    - Transaction is processed through the appropriate payment processor
+    
+    **Step 4: Result Handling**
+    - Upon completion, customer is redirected to merchant's success or failure URL
+    - Transaction reference is passed as a parameter
+    - Merchant can verify transaction status using the [Get Transaction Details](#operation/getTransactionDetails) endpoint
+    
+    #### 3. Payment Page Features
+    
+    **Security Features:**
+    - PCI DSS Level 1 compliant hosting environment
+    - SSL/TLS encryption for all communications
+    - Tokenization of sensitive card data
+    - 3D Secure 2.0 support for enhanced authentication
+    
+    **User Experience:**
+    - Mobile-responsive design optimized for all devices
+    - Real-time card validation and formatting
+    - Clear error messaging and user guidance
+    - Customizable styling and branding options via custom CSS
+    
+    **Payment Methods:**
+    - Visa, Mastercard, American Express
+    - Support for both credit and debit cards
+    - International and domestic card processing
+    - Multi-currency support
+    
+    #### 4. Integration Requirements
+    
+    **Prerequisites:**
+    - Active DPG merchant account
+    - Merchant credentials (Username, Password, MerchantNumber, MerchantAccessCode)
+    - SSL-enabled website for success/failure redirects
+    
+    **Configuration Parameters:**
+    - `PaymentMode`: Set to "INTERNET" for web-based transactions or "MOTO" for Mail Order/Telephone Order transactions
+    - `PaymentType`: Typically "StandardPay" for standard payment processing
+    - `Locale`: Language preference (en, fr, de, es, etc.)
+    - `MerchantSuccessUrl`: URL for successful payment redirects
+    - `MerchantFailUrl`: URL for failed payment redirects
+    
+    #### 5. Transaction Flow
+    
+    ```
+    Merchant Website → Generate Transaction → Payment Page → Payment Processing → Result → Merchant Website
+    ```
+    
+    1. **Initiation**: Customer initiates checkout on merchant website
+    2. **Generation**: Merchant calls the [Generate Transaction](#operation/generateTransaction) endpoint
+    3. **Redirection**: Customer is redirected to DPG payment page
+    4. **Payment**: Customer completes payment on secure hosted page
+    5. **Processing**: Transaction is processed in real-time
+    6. **Authentication**: 3D Secure authentication if required
+    7. **Completion**: Customer is redirected back to merchant website
+    8. **Verification**: Merchant verifies transaction status using [Get Transaction Details](#operation/getTransactionDetails)
+    
+    #### 6. Error Handling
+    
+    The payment page handles various error scenarios:
+    - Invalid card details with specific error messages
+    - Insufficient funds notifications
+    - 3D Secure authentication failures
+    - Network connectivity issues
+    - Payment processor downtime
+    
+    All errors are presented to the customer with clear, actionable messages, and the merchant is notified through the failure URL redirection.
+    
+    #### 7. Testing and Development
+    
+    **Test Environment:**
+    - Dedicated testing URLs and credentials
+    - Test card numbers for various scenarios
+    - Sandbox mode for integration testing
+    - Detailed transaction logs for debugging
+    
+    **Integration Testing Checklist:**
+    - Successful payment flows
+    - Failed payment scenarios
+    - 3D Secure authentication flows
+    - Timeout and error handling
+    - Mobile device compatibility
+    - Multi-currency transactions
+    
+    #### 8. Custom CSS Styling
+    
+    The DPG payment page (`ProcessCreditCard.aspx`) supports custom CSS styling to match your brand identity and provide a seamless customer experience.
+    
+    **How Custom CSS Works:**
+    - Custom CSS is configured as a merchant-specific setting in the DPG system
+    - Styles are applied to the hosted payment page to customize appearance
+    - CSS can modify colors, fonts, layouts, and other visual elements
+    - Changes are applied consistently across all payment page instances for your merchant account
+    
+    **Implementation Process:**
+    1. **Develop CSS**: Create custom CSS styles that align with your brand guidelines
+    2. **Testing**: Test styles thoroughly across different browsers and devices
+    3. **Submission**: Provide the CSS file to Datacom for review and validation
+    4. **Configuration**: Datacom uploads and configures the CSS against your merchant account
+    5. **Deployment**: Custom styles are applied to your payment page in production
+    
+    **CSS Guidelines:**
+    - Ensure styles are responsive and work across mobile and desktop devices
+    - Test compatibility with major browsers (Chrome, Firefox, Safari, Edge)
+    - Maintain accessibility standards for users with disabilities
+    - Avoid styles that might interfere with payment form functionality
+    - Consider different screen sizes and orientations
+    
+    **Merchant Configuration:**
+    - Custom CSS is configured as a merchant-level setting in DPG
+    - Each merchant can have unique styling while maintaining security standards
+    - CSS updates require resubmission through Datacom support
+    - Changes are typically configuration updates and do not require code changes on your end
+    
+    #### 9. Best Practices
+    
+    - Always validate transaction status after customer return using [Get Transaction Details](#operation/getTransactionDetails)
+    - Implement proper timeout handling for payment page redirects
+    - Use unique order references for each transaction
+    - Store transaction references for reconciliation
+    - Implement proper error handling for network failures
+    - Test thoroughly across different browsers and devices
+    - Monitor transaction success rates and optimize accordingly
+    - Consider using [Process Refund](#operation/processRefund) for handling refund requests
+    - For direct payment integration (bypassing hosted page), see [Process Card Payment](#operation/processPayment)
+    - Use [Tokenize Card Details](#operation/processTokeniseCard) for secure storage of payment methods
     
     ## Authentication
     
@@ -27,23 +187,71 @@ info:
     
     ## Base URL
     
-    **Production**: `https://your-dpg-domain.com/api/payments/v1.0`
-    **Testing**: Contact Datacom for testing environment details
+    **Production**: `https://publicapi.paymentmanager.co.nz//api/payments/v1.0`
+    **Testing**: `https://uat-publicapi.paymentmanager.co.nz//api/payments/v1.0`
     
-    ## Error Handling
+    ## Error Reference
     
-    The API uses standard HTTP status codes and returns detailed error information in the response body. Common error codes include:
-    - `200` - Success
-    - `400` - Bad Request (validation errors)
-    - `401` - Unauthorized (authentication failure)
-    - `404` - Not Found (transaction not found)
-    - `500` - Internal Server Error
+    This section provides a simplified reference for the core error and status fields in DPG API responses, based on actual transaction data and system implementation.
+    
+    ### Response Fields
+    
+    **TransStatusCode** - Transaction status indicating processing outcome
+    **Message** - Human-readable description of the transaction result  
+    **TxnResponseCode** - Numeric response code from payment processor
+    
+    ### TransStatusCode Values
+    
+    | Status | Description | Meaning | Next Steps |
+    |--------|-------------|---------|------------|
+    | INIT | Initialized | Transaction created but processing not yet completed | Wait for final status or check transaction details |
+    | SUCS | Successful | Transaction processed successfully | Transaction complete - no further action needed |
+    | FAIL | Failed | Transaction processing failed | Check Message field for specific reason, may retry with different payment method |
+    | CNCD | Cancelled | Transaction cancelled by customer or system | Customer cancelled payment process |
+    
+    ### TxnResponseCode Values
+    
+    Complete response code matrix based on actual transaction data:
+    
+    | TxnResponseCode | Message | AcqResponseCode | Description |
+    |-----------------|---------|-----------------|-------------|
+    | (empty) | Transaction has expired | (empty) | The transaction has expired (was not attempted). No additional error info as it was not processed by the gateway |
+    | DECLINED | Wild card value | Wild card value | The problem may be related to the cardholder's account. View the "Message" field for additional info |
+    | DECLINED | Do not honour | 5 | Card has declined (could be due to fraud, invalid cvv, stolen card etc.) |
+    | DECLINED | Policy (Mastercard use only) | 82 | The customer's bank (Card Issuer) has declined the transaction due to a policy reason. |
+    | DECLINED | Fraud/Security (Mastercard use only) | 83 | The customer's bank (Card Issuer) has declined the transaction due to a security reason. |
+    | INSUFFICIENT_FUNDS | Not sufficient funds | 51 | Insufficient funds for purchase. Please check account balance. |
+    | EXPIRED_CARD | Expired card | 54 | The card has expired. Please try again with a valid card. |
+    
+    ### Message Field Examples
+    
+    Common message values found in transaction data:
+    
+    **Success Messages:**
+    - "Approved"
+    
+    **Failure Messages:**
+    - "Not sufficient funds"
+    - "Transaction declined"
+    - "Do not honour"
+    - "Transaction has expired"
+    
+    **Cancellation Messages:**
+    - "Customer pressed cancel button"
     
     ## Integration Support
     
     For integration assistance, contact the Datacom Payment Gateway support team.
     
+    **Testing Resources:**
+    - **Postman Collection**: A comprehensive Postman collection is available (`DPG UAT - REST API Version 1.0 - API docs version.postman_collection.json`) containing pre-configured requests for all API endpoints
+    - Use the collection to quickly test API functionality during development and integration
+    - Import the collection into Postman and configure your merchant credentials for immediate testing
+    
   version: 1.0.0
+  x-logo:
+    url: ./Datacom-Primary-Logo-RGB.svg
+    altText: Datacom Logo
   contact:
     name: Datacom Payment Gateway Support
     url: https://www.datacom.com
@@ -57,6 +265,10 @@ servers:
   - url: https://test-dpg-domain.com/api/payments/v1.0
     description: Testing server
 
+externalDocs:
+  description: Postman Collection for API Testing
+  url: ./DPG%20UAT%20-%20REST%20API%20Version%201.0%20-%20API%20docs%20version.postman_collection.json
+
 paths:
   /processpayment:
     post:
@@ -68,13 +280,13 @@ paths:
         
         **Important Notes:**
         - Card details are processed securely
-        - PCI DSS compliance may be required for direct card processing
+        - PCI DSS compliance will be required for direct card processing
         - Consider using tokenization for recurring payments
         
         **Use Cases:**
         - Direct card payments
         - One-time transactions
-        - E-commerce checkout
+        - Recurring payments with stored tokens
       operationId: processPayment
       requestBody:
         required: true
@@ -83,11 +295,11 @@ paths:
             schema:
               $ref: '#/components/schemas/ProcessPayment'
             example:
-              MerchantNumber: "TESTDC00018"
-              UserName: "DatacomTestUserName"
-              Password: "jPSf1ywbQPiKtJ163FvS"
+              MerchantNumber: "YOUR_MERCHANT_NUMBER"
+              UserName: "your_merchant_username"
+              Password: "your_merchant_password"
               InputCurrency: "NZD"
-              MerchantAccessCode: "9a00eee606b948b06676c8d3af00c5a5"
+              MerchantAccessCode: "your_merchant_access_code"
               OrderInfo: "Test-abc123456789"
               TransAmount: 1.00
               Card:
@@ -97,7 +309,7 @@ paths:
                 cscCode: "100"
       responses:
         '200':
-          description: Payment processed successfully
+          description: Successful response
           content:
             application/json:
               schema:
@@ -152,11 +364,11 @@ paths:
             schema:
               $ref: '#/components/schemas/GenerateTransaction'
             example:
-              MerchantNumber: "TESTDC00018"
-              UserName: "DatacomTestUserName"
-              Password: "jPSf1ywbQPiKtJ163FvS"
+              MerchantNumber: "YOUR_MERCHANT_NUMBER"
+              UserName: "your_merchant_username"
+              Password: "your_merchant_password"
               InputCurrency: "NZD"
-              MerchantAccessCode: "9a00eee606b948b06676c8d3af00c5a5"
+              MerchantAccessCode: "your_merchant_access_code"
               OrderInfo: "Test-abc123456789"
               TransAmount: 1.00
               PaymentMode: "INTERNET"
@@ -209,12 +421,12 @@ paths:
               $ref: '#/components/schemas/GetTransactionDetails'
             example:
               transactionReference: "36C4A4C2B8CD49A4BEDD3CD123DED01E"
-              merchantNumber: "TESTDC00018"
-              UserName: "DatacomTestUserName"
-              Password: "jPSf1ywbQPiKtJ163FvS"
+              merchantNumber: "YOUR_MERCHANT_NUMBER"
+              UserName: "your_merchant_username"
+              Password: "your_merchant_password"
       responses:
         '200':
-          description: Transaction details retrieved successfully
+          description: Successful response
           content:
             application/json:
               schema:
@@ -256,9 +468,9 @@ paths:
             schema:
               $ref: '#/components/schemas/GetTransactions'
             example:
-              merchantNumber: "TESTDC00018"
-              username: "DatacomTestUserName"
-              password: "jPSf1ywbQPiKtJ163FvS"
+              merchantNumber: "YOUR_MERCHANT_NUMBER"
+              username: "your_merchant_username"
+              password: "your_merchant_password"
               pageSize: 10
               pageNumber: 1
               sortColumn: "TransAmount"
@@ -269,7 +481,7 @@ paths:
               toStartDate: "2023-11-30T02:39:07.625Z"
       responses:
         '200':
-          description: Transaction list retrieved successfully
+          description: Successful response
           content:
             application/json:
               schema:
@@ -314,16 +526,16 @@ paths:
               $ref: '#/components/schemas/ProcessRefund'
             example:
               InputCurrency: "NZD"
-              MerchantAccessCode: "9a00eee606b948b06676c8d3af00c5a5"
-              MerchantNumber: "TESTDC00018"
-              UserName: "DatacomTestUserName"
-              Password: "jPSf1ywbQPiKtJ163FvS"
+              MerchantAccessCode: "your_merchant_access_code"
+              MerchantNumber: "YOUR_MERCHANT_NUMBER"
+              UserName: "your_merchant_username"
+              Password: "your_merchant_password"
               OrderInfo: "Refund-abc123456789"
               TransAmount: 1.00
               paymentTransactionReference: "36C4A4C2B8CD49A4BEDD3CD123DED01E"
       responses:
         '200':
-          description: Refund processed successfully
+          description: Successful response
           content:
             application/json:
               schema:
@@ -369,18 +581,18 @@ paths:
               $ref: '#/components/schemas/ProcessAuthorisation'
             example:
               InputCurrency: "NZD"
-              MerchantAccessCode: "9a00eee606b948b06676c8d3af00c5a5"
-              MerchantNumber: "TESTDC00018"
+              MerchantAccessCode: "your_merchant_access_code"
+              MerchantNumber: "YOUR_MERCHANT_NUMBER"
               AuthAmounts: "10,20,30"
-              UserName: "DatacomTestUserName"
-              Password: "jPSf1ywbQPiKtJ163FvS"
+              UserName: "your_merchant_username"
+              Password: "your_merchant_password"
               OrderInfo: "Auth-abc123456789"
               TransAmount: 1.00
               Token:
                 token: "6729011452840008"
       responses:
         '200':
-          description: Authorization processed successfully
+          description: Successful response
           content:
             application/json:
               schema:
@@ -414,16 +626,16 @@ paths:
               $ref: '#/components/schemas/ProcessCapture'
             example:
               InputCurrency: "NZD"
-              MerchantAccessCode: "9a00eee606b948b06676c8d3af00c5a5"
-              MerchantNumber: "TESTDC00018"
+              MerchantAccessCode: "your_merchant_access_code"
+              MerchantNumber: "YOUR_MERCHANT_NUMBER"
               TransAmount: 1.00
-              UserName: "DatacomTestUserName"
-              Password: "jPSf1ywbQPiKtJ163FvS"
+              UserName: "your_merchant_username"
+              Password: "your_merchant_password"
               OrderInfo: "Capture-abc123456789"
               AuthTransactionReference: "36C4A4C2B8CD49A4BEDD3CD123DED01E"
       responses:
         '200':
-          description: Capture processed successfully
+          description: Successful response
           content:
             application/json:
               schema:
@@ -458,15 +670,15 @@ paths:
               $ref: '#/components/schemas/ProcessVoid'
             example:
               InputCurrency: "NZD"
-              MerchantAccessCode: "9a00eee606b948b06676c8d3af00c5a5"
-              MerchantNumber: "TESTDC00018"
-              UserName: "DatacomTestUserName"
-              Password: "jPSf1ywbQPiKtJ163FvS"
+              MerchantAccessCode: "your_merchant_access_code"
+              MerchantNumber: "YOUR_MERCHANT_NUMBER"
+              UserName: "your_merchant_username"
+              Password: "your_merchant_password"
               OrderInfo: "Void-abc123456789"
               AuthTransactionReference: "36C4A4C2B8CD49A4BEDD3CD123DED01E"
       responses:
         '200':
-          description: Void processed successfully
+          description: Successful response
           content:
             application/json:
               schema:
@@ -507,10 +719,10 @@ paths:
               $ref: '#/components/schemas/ProcessTokeniseCard'
             example:
               InputCurrency: "NZD"
-              MerchantAccessCode: "9a00eee606b948b06676c8d3af00c5a5"
-              MerchantNumber: "TESTDC00018"
-              UserName: "DatacomTestUserName"
-              Password: "jPSf1ywbQPiKtJ163FvS"
+              MerchantAccessCode: "your_merchant_access_code"
+              MerchantNumber: "YOUR_MERCHANT_NUMBER"
+              UserName: "your_merchant_username"
+              Password: "your_merchant_password"
               OrderInfo: "Tokenize-abc123456789"
               Card:
                 cardName: "Any"
@@ -519,7 +731,7 @@ paths:
                 cscCode: "100"
       responses:
         '200':
-          description: Card tokenized successfully
+          description: Successful response
           content:
             application/json:
               schema:
@@ -543,7 +755,7 @@ components:
         MerchantNumber:
           type: string
           description: Merchant identifier assigned by Datacom
-          example: "TESTDC00018"
+          example: "YOUR_MERCHANT_NUMBER"
         UserName:
           type: string
           description: Merchant username for authentication
@@ -560,11 +772,12 @@ components:
           enum: ["NZD", "AUD", "USD", "EUR", "GBP"]
         MerchantAccessCode:
           type: string
-          description: Merchant access code for additional security
+          description: Merchant access code assigned to the merchant
           example: "9a00eee606b948b06676c8d3af00c5a5"
         OrderInfo:
           type: string
           description: Merchant order reference (should be unique)
+          maxLength: 40
           example: "Order-123456789"
         TransAmount:
           type: number
@@ -574,8 +787,9 @@ components:
           example: 1.00
         PaymentMode:
           type: string
-          description: Payment mode
+          description: Payment mode - "INTERNET" for web-based transactions, "MOTO" for Mail Order/Telephone Order transactions
           example: "INTERNET"
+          enum: ["INTERNET", "MOTO"]
         PaymentType:
           type: string
           description: Type of payment processing
@@ -605,9 +819,21 @@ components:
         ClientTransData5:
           type: string
           description: Custom transaction data field 5
-        ThreeDSCheckRule:
+        ClientTransData6:
           type: string
-          description: 3D Secure check rule
+          description: Custom transaction data field 6
+        ClientTransData7:
+          type: string
+          description: Custom transaction data field 7
+        ClientTransData8:
+          type: string
+          description: Custom transaction data field 8
+        ClientTransData9:
+          type: string
+          description: Custom transaction data field 9
+        ClientTransData10:
+          type: string
+          description: Custom transaction data field 10
 
     GenerateTransaction:
       type: object
@@ -626,7 +852,7 @@ components:
         MerchantNumber:
           type: string
           description: Merchant identifier assigned by Datacom
-          example: "TESTDC00018"
+          example: "YOUR_MERCHANT_NUMBER"
         UserName:
           type: string
           description: Merchant username for authentication
@@ -642,11 +868,12 @@ components:
           example: "NZD"
         MerchantAccessCode:
           type: string
-          description: Merchant access code for additional security
+          description: Merchant access code assigned to the merchant
           example: "9a00eee606b948b06676c8d3af00c5a5"
         OrderInfo:
           type: string
           description: Merchant order reference (should be unique)
+          maxLength: 40
           example: "Order-123456789"
         TransAmount:
           type: number
@@ -656,9 +883,9 @@ components:
           example: 1.00
         PaymentMode:
           type: string
-          description: Payment mode for the transaction
+          description: Payment mode for the transaction - "INTERNET" for web-based transactions, "MOTO" for Mail Order/Telephone Order transactions
           example: "INTERNET"
-          enum: ["INTERNET", "MOTO", "RECURRING"]
+          enum: ["INTERNET", "MOTO"]
         Locale:
           type: string
           description: Language locale for payment page
@@ -686,15 +913,53 @@ components:
           type: string
           description: Type of payment processing
           example: "StandardPay"
+          enum: 
+            - "StandardPay"
+            - "TokeniseOnly"
+            - "TokeniseAndPay"
         BillingAddress:
           $ref: '#/components/schemas/Address'
         ShippingAddress:
           $ref: '#/components/schemas/Address'
         CustomerDetails:
           $ref: '#/components/schemas/Customer'
+        ClientTransData1:
+          type: string
+          description: Custom transaction data field 1
+        ClientTransData2:
+          type: string
+          description: Custom transaction data field 2
+        ClientTransData3:
+          type: string
+          description: Custom transaction data field 3
+        ClientTransData4:
+          type: string
+          description: Custom transaction data field 4
+        ClientTransData5:
+          type: string
+          description: Custom transaction data field 5
+        ClientTransData6:
+          type: string
+          description: Custom transaction data field 6
+        ClientTransData7:
+          type: string
+          description: Custom transaction data field 7
+        ClientTransData8:
+          type: string
+          description: Custom transaction data field 8
+        ClientTransData9:
+          type: string
+          description: Custom transaction data field 9
+        ClientTransData10:
+          type: string
+          description: Custom transaction data field 10
         ThreeDSCheckRule:
           type: string
           description: 3D Secure check rule
+          enum:
+            - "ENFORCE"
+            - "BYPASS"
+            - "ATTEMPT"
 
     GetTransactionDetails:
       type: object
@@ -711,7 +976,7 @@ components:
         merchantNumber:
           type: string
           description: Merchant identifier
-          example: "TESTDC00018"
+          example: "YOUR_MERCHANT_NUMBER"
         UserName:
           type: string
           description: Merchant username for authentication
@@ -734,7 +999,7 @@ components:
         merchantNumber:
           type: string
           description: Merchant identifier
-          example: "TESTDC00018"
+          example: "YOUR_MERCHANT_NUMBER"
         username:
           type: string
           description: Merchant username for authentication
@@ -803,7 +1068,7 @@ components:
         MerchantNumber:
           type: string
           description: Merchant identifier
-          example: "TESTDC00018"
+          example: "YOUR_MERCHANT_NUMBER"
         UserName:
           type: string
           description: Merchant username for authentication
@@ -824,6 +1089,7 @@ components:
         OrderInfo:
           type: string
           description: Refund order reference
+          maxLength: 40
           example: "Refund-123456789"
         TransAmount:
           type: number
@@ -846,7 +1112,7 @@ components:
         MerchantNumber:
           type: string
           description: Merchant identifier
-          example: "TESTDC00018"
+          example: "YOUR_MERCHANT_NUMBER"
         UserName:
           type: string
           description: Merchant username for authentication
@@ -867,6 +1133,7 @@ components:
         OrderInfo:
           type: string
           description: Authorization order reference
+          maxLength: 40
           example: "Auth-123456789"
         TransAmount:
           type: number
@@ -902,7 +1169,7 @@ components:
         MerchantNumber:
           type: string
           description: Merchant identifier
-          example: "TESTDC00018"
+          example: "YOUR_MERCHANT_NUMBER"
         UserName:
           type: string
           description: Merchant username for authentication
@@ -923,6 +1190,7 @@ components:
         OrderInfo:
           type: string
           description: Capture order reference
+          maxLength: 40
           example: "Capture-123456789"
         TransAmount:
           type: number
@@ -949,7 +1217,7 @@ components:
         MerchantNumber:
           type: string
           description: Merchant identifier
-          example: "TESTDC00018"
+          example: "YOUR_MERCHANT_NUMBER"
         UserName:
           type: string
           description: Merchant username for authentication
@@ -970,6 +1238,7 @@ components:
         OrderInfo:
           type: string
           description: Void order reference
+          maxLength: 40
           example: "Void-123456789"
 
     ProcessTokeniseCard:
@@ -986,7 +1255,7 @@ components:
         MerchantNumber:
           type: string
           description: Merchant identifier
-          example: "TESTDC00018"
+          example: "YOUR_MERCHANT_NUMBER"
         UserName:
           type: string
           description: Merchant username for authentication
@@ -1007,6 +1276,7 @@ components:
         OrderInfo:
           type: string
           description: Tokenization order reference
+          maxLength: 40
           example: "Token-123456789"
         Card:
           $ref: '#/components/schemas/Card'
@@ -1164,11 +1434,12 @@ components:
         OrderInfo:
           type: string
           description: Order information
+          maxLength: 40
           example: "Order-123456789"
         MerchantNumber:
           type: string
           description: Merchant identifier
-          example: "TESTDC00018"
+          example: "YOUR_MERCHANT_NUMBER"
         TransactionTime:
           type: string
           format: date-time
@@ -1273,6 +1544,7 @@ components:
         OrderInfo:
           type: string
           description: Order information
+          maxLength: 40
           example: "Order-123456789"
         TransactionTime:
           type: string
@@ -1338,4 +1610,6 @@ x-tagGroups:
   - name: Advanced Features
     tags:
       - Authorization & Capture
-      - Tokenization 
+      - Tokenization
+
+

@@ -1,0 +1,467 @@
+{
+	"info": {
+		"_postman_id": "98ab5054-19b9-4629-a491-00e671d390f0",
+		"name": "DPG UAT - REST API Version 1.0 - API docs version",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30030479"
+	},
+	"item": [
+		{
+			"name": "GenerateTransaction for Standard Payment v1.0",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var uuid = require('uuid');\r",
+							"pm.environment.set(\"PaymentOrderNumber\", \"Order-\" + uuid.v4().substring(16));\r",
+							"var reqBody =pm.request.body.raw;\r",
+							"var xmlTreeReq = xml2Json(reqBody);\r",
+							"\r",
+							"postman.setEnvironmentVariable(\"ClientTransData1\",\"Test Client Transaction 1\");\r",
+							"postman.setEnvironmentVariable(\"ClientTransData2\",\"Test Client Transaction 2\");\r",
+							"postman.setEnvironmentVariable(\"ClientTransData3\",\"Test Client Transaction 3\");\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"PaymentMode\": \"INTERNET\",\r\n    \"InputCurrency\": \"NZD\",\r\n    \"Locale\": \"en\",\r\n    \"MerchantAccessCode\": \"{{PaymentMerchantAccessCode}}\",\r\n    \"MerchantNumber\": \"{{PaymentMerchantNumber}}\",\r\n    \"OrderInfo\": \"{{PaymentOrderNumber}}\", \r\n    \"TransAmount\": 1.00, \r\n    \"TransSource\": \"PostmanTestPayment\",\r\n    \"ClientTransData1\": \"{{ClientTransData1}}\",\r\n    \"ClientTransData2\": \"{{ClientTransData2}}\",\r\n    \"ClientTransData3\": \"{{ClientTransData3}}\",\r\n    \"UserName\": \"{{UserName}}\",\r\n    \"Password\": \"{{Password}}\",\r\n    \"MerchantSuccessUrl\": \"successUrl\",\r\n    \"MerchantFailUrl\": \"failUrl\",\r\n    \"PaymentType\": \"StandardPay\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://uat-publicapi.paymentmanager.co.nz/api/payments/v1.0/generatetransaction",
+					"protocol": "https",
+					"host": [
+						"uat-publicapi",
+						"paymentmanager",
+						"co",
+						"nz"
+					],
+					"path": [
+						"api",
+						"payments",
+						"v1.0",
+						"generatetransaction"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GenerateTransaction for Tokenise Card v1.0",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var uuid = require('uuid');\r",
+							"pm.environment.set(\"PaymentOrderNumber\", \"Order-\" + uuid.v4().substring(16));\r",
+							"var reqBody =pm.request.body.raw;\r",
+							"var xmlTreeReq = xml2Json(reqBody);\r",
+							"\r",
+							"postman.setEnvironmentVariable(\"ClientTransData1\",\"Test Client Transaction 1\");\r",
+							"postman.setEnvironmentVariable(\"ClientTransData2\",\"Test Client Transaction 2\");\r",
+							"postman.setEnvironmentVariable(\"ClientTransData3\",\"Test Client Transaction 3\");\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"PaymentMode\": \"INTERNET\",\r\n    \"InputCurrency\": \"NZD\",\r\n    \"Locale\": \"en\",\r\n    \"MerchantAccessCode\": \"{{TokenisationMerchantAccessCode}}\",\r\n    \"MerchantNumber\": \"{{TokenisationMerchantNumber}}\",\r\n    \"OrderInfo\": \"{{PaymentOrderNumber}}\", \r\n    \"TransAmount\": 0.00, \r\n    \"TransSource\": \"PostmanTestPayment\",\r\n    \"ClientTransData1\": \"{{ClientTransData1}}\",\r\n    \"ClientTransData2\": \"{{ClientTransData2}}\",\r\n    \"ClientTransData3\": \"{{ClientTransData3}}\",\r\n    \"UserName\": \"{{UserName}}\",\r\n    \"Password\": \"{{Password}}\",\r\n    \"MerchantSuccessUrl\": \"successUrl\",\r\n    \"MerchantFailUrl\": \"failUrl\",\r\n    \"PaymentType\": \"TokeniseOnly\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://uat-publicapi.paymentmanager.co.nz/api/payments/v1.0/generatetransaction",
+					"protocol": "https",
+					"host": [
+						"uat-publicapi",
+						"paymentmanager",
+						"co",
+						"nz"
+					],
+					"path": [
+						"api",
+						"payments",
+						"v1.0",
+						"generatetransaction"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GenerateTransaction for Tokenise and Pay v1.0",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var uuid = require('uuid');\r",
+							"pm.environment.set(\"PaymentOrderNumber\", \"Order-\" + uuid.v4().substring(16));\r",
+							"var reqBody =pm.request.body.raw;\r",
+							"var xmlTreeReq = xml2Json(reqBody);\r",
+							"\r",
+							"postman.setEnvironmentVariable(\"ClientTransData1\",\"Test Client Transaction 1\");\r",
+							"postman.setEnvironmentVariable(\"ClientTransData2\",\"Test Client Transaction 2\");\r",
+							"postman.setEnvironmentVariable(\"ClientTransData3\",\"Test Client Transaction 3\");\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"PaymentMode\": \"INTERNET\",\r\n    \"InputCurrency\": \"NZD\",\r\n    \"Locale\": \"en\",\r\n    \"MerchantAccessCode\": \"{{TokenisationMerchantAccessCode}}\",\r\n    \"MerchantNumber\": \"{{TokenisationMerchantNumber}}\",\r\n    \"OrderInfo\": \"{{PaymentOrderNumber}}\", \r\n    \"TransAmount\": 1.00, \r\n    \"TransSource\": \"PostmanTestPayment\",\r\n    \"ClientTransData1\": \"{{ClientTransData1}}\",\r\n    \"ClientTransData2\": \"{{ClientTransData2}}\",\r\n    \"ClientTransData3\": \"{{ClientTransData3}}\",\r\n    \"UserName\": \"{{UserName}}\",\r\n    \"Password\": \"{{Password}}\",\r\n    \"MerchantSuccessUrl\": \"successUrl\",\r\n    \"MerchantFailUrl\": \"failUrl\",\r\n    \"PaymentType\": \"TokeniseAndPay\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://uat-publicapi.paymentmanager.co.nz/api/payments/v1.0/generatetransaction",
+					"protocol": "https",
+					"host": [
+						"uat-publicapi",
+						"paymentmanager",
+						"co",
+						"nz"
+					],
+					"path": [
+						"api",
+						"payments",
+						"v1.0",
+						"generatetransaction"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetTransactionDetails v1.0",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"TransactionReference\": \"{{TokenisationMerchantNumber}}\", \r\n    \"MerchantNumber\": \"{{TokenisationMerchantNumber}}\",\r\n    \"UserName\": \"{{UserName}}\",\r\n    \"Password\": \"{{Password}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://uat-publicapi.paymentmanager.co.nz/api/payments/v1.0/gettransactiondetails",
+					"protocol": "https",
+					"host": [
+						"uat-publicapi",
+						"paymentmanager",
+						"co",
+						"nz"
+					],
+					"path": [
+						"api",
+						"payments",
+						"v1.0",
+						"gettransactiondetails"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ProcessPayment Token v1.0",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var uuid = require('uuid');\r",
+							"pm.environment.set(\"PaymentOrderNumber\", \"Order-\" + uuid.v4().substring(16));\r",
+							"var reqBody =pm.request.body.raw;\r",
+							"var xmlTreeReq = xml2Json(reqBody);\r",
+							"\r",
+							"postman.setEnvironmentVariable(\"ClientTransData1\",\"Test Client Transaction 1\");\r",
+							"postman.setEnvironmentVariable(\"ClientTransData2\",\"Test Client Transaction 2\");\r",
+							"postman.setEnvironmentVariable(\"ClientTransData3\",\"Test Client Transaction 3\");\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"InputCurrency\": \"NZD\",\r\n    \"MerchantAccessCode\": \"{{PaymentMerchantAccessCode}}\",\r\n    \"MerchantNumber\": \"{{PaymentMerchantNumber}}\",\r\n    \"UserName\": \"{{UserName}}\",\r\n    \"Password\": \"{{Password}}\",\r\n    \"OrderInfo\": \"{{PaymentOrderNumber}}\", \r\n    \"TransAmount\": 1.00, \r\n    \"Token\":\r\n    {\r\n        \"token\": \"\"\r\n    } \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://uat-publicapi.paymentmanager.co.nz/api/payments/v1.0/processpayment",
+					"protocol": "https",
+					"host": [
+						"uat-publicapi",
+						"paymentmanager",
+						"co",
+						"nz"
+					],
+					"path": [
+						"api",
+						"payments",
+						"v1.0",
+						"processpayment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ProcessRefund v1.0",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var uuid = require('uuid');\r",
+							"pm.environment.set(\"PaymentOrderNumber\", \"Order-\" + uuid.v4().substring(16));\r",
+							"var reqBody =pm.request.body.raw;\r",
+							"var xmlTreeReq = xml2Json(reqBody);\r",
+							"\r",
+							"postman.setEnvironmentVariable(\"ClientTransData1\",\"Test Client Transaction 1\");\r",
+							"postman.setEnvironmentVariable(\"ClientTransData2\",\"Test Client Transaction 2\");\r",
+							"postman.setEnvironmentVariable(\"ClientTransData3\",\"Test Client Transaction 3\");\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"InputCurrency\": \"NZD\",\r\n    \"MerchantAccessCode\": \"{{PaymentMerchantAccessCode}}\",\r\n    \"MerchantNumber\": \"{{PaymentMerchantNumber}}\",\r\n    \"UserName\": \"{{UserName}}\",\r\n    \"Password\": \"{{Password}}\",\r\n    \"OrderInfo\": \"{{PaymentOrderNumber}}\", \r\n    \"TransAmount\": 1.00, \r\n    \"paymentTransactionReference\": \"46716801D5E344F8919B90E9971FF67D\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://uat-publicapi.paymentmanager.co.nz/api/payments/v1.0/processrefund",
+					"protocol": "https",
+					"host": [
+						"uat-publicapi",
+						"paymentmanager",
+						"co",
+						"nz"
+					],
+					"path": [
+						"api",
+						"payments",
+						"v1.0",
+						"processrefund"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ProcessAuthorisation v1.0",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var uuid = require('uuid');\r",
+							"pm.environment.set(\"PaymentOrderNumber\", \"Order-\" + uuid.v4().substring(16));\r",
+							"var reqBody =pm.request.body.raw;\r",
+							"var xmlTreeReq = xml2Json(reqBody);\r",
+							"\r",
+							"postman.setEnvironmentVariable(\"ClientTransData1\",\"Test Client Transaction 1\");\r",
+							"postman.setEnvironmentVariable(\"ClientTransData2\",\"Test Client Transaction 2\");\r",
+							"postman.setEnvironmentVariable(\"ClientTransData3\",\"Test Client Transaction 3\");\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"AuthAmounts\": \"10,20,30\",\r\n    \"InputCurrency\": \"NZD\",\r\n    \"MerchantAccessCode\": \"{{PaymentMerchantAccessCode}}\",\r\n    \"ClientTransData1\": \"test1\",\r\n    \"MerchantNumber\": \"{{PaymentMerchantNumber}}\",\r\n    \"UserName\": \"{{UserName}}\",\r\n    \"Password\": \"{{Password}}\",\r\n    \"OrderInfo\": \"{{PaymentOrderNumber}}\", \r\n    \"TransAmount\": 1.00, \r\n    \"Token\": \r\n    {\r\n        \"token\": \"\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://uat-publicapi.paymentmanager.co.nz/api/payments/v1.0/processauthorisation",
+					"protocol": "https",
+					"host": [
+						"uat-publicapi",
+						"paymentmanager",
+						"co",
+						"nz"
+					],
+					"path": [
+						"api",
+						"payments",
+						"v1.0",
+						"processauthorisation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ProcessCapture v1.0",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var uuid = require('uuid');\r",
+							"pm.environment.set(\"PaymentOrderNumber\", \"Order-\" + uuid.v4().substring(16));\r",
+							"var reqBody =pm.request.body.raw;\r",
+							"var xmlTreeReq = xml2Json(reqBody);\r",
+							"\r",
+							"postman.setEnvironmentVariable(\"ClientTransData1\",\"Test Client Transaction 1\");\r",
+							"postman.setEnvironmentVariable(\"ClientTransData2\",\"Test Client Transaction 2\");\r",
+							"postman.setEnvironmentVariable(\"ClientTransData3\",\"Test Client Transaction 3\");\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"InputCurrency\": \"NZD\",\r\n    \"MerchantAccessCode\": \"{{PaymentMerchantAccessCode}}\",\r\n    \"ClientTransData1\": \"test1\",\r\n    \"MerchantNumber\": \"{{PaymentMerchantNumber}}\",\r\n    \"UserName\": \"{{UserName}}\",\r\n    \"Password\": \"{{Password}}\",\r\n    \"OrderInfo\": \"{{PaymentOrderNumber}}\", \r\n    \"TransAmount\": 30.00, \r\n    \"AuthTransactionReference\": \"3292BD8D694145D9970A514FAECE46F7\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://uat-publicapi.paymentmanager.co.nz/api/payments/v1.0/processcapture",
+					"protocol": "https",
+					"host": [
+						"uat-publicapi",
+						"paymentmanager",
+						"co",
+						"nz"
+					],
+					"path": [
+						"api",
+						"payments",
+						"v1.0",
+						"processcapture"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ProcessVoid v1.0",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var uuid = require('uuid');\r",
+							"pm.environment.set(\"PaymentOrderNumber\", \"Order-\" + uuid.v4().substring(16));\r",
+							"var reqBody =pm.request.body.raw;\r",
+							"var xmlTreeReq = xml2Json(reqBody);\r",
+							"\r",
+							"postman.setEnvironmentVariable(\"ClientTransData1\",\"Test Client Transaction 1\");\r",
+							"postman.setEnvironmentVariable(\"ClientTransData2\",\"Test Client Transaction 2\");\r",
+							"postman.setEnvironmentVariable(\"ClientTransData3\",\"Test Client Transaction 3\");\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"InputCurrency\": \"NZD\",\r\n    \"MerchantAccessCode\": \"{{PaymentMerchantAccessCode}}\",\r\n    \"ClientTransData1\": \"test1\",\r\n    \"MerchantNumber\": \"{{PaymentMerchantNumber}}\",\r\n    \"UserName\": \"{{UserName}}\",\r\n    \"Password\": \"{{Password}}\",\r\n    \"OrderInfo\": \"{{PaymentOrderNumber}}\", \r\n    \"AuthTransactionReference\": \"0DB9C056114D49708411D75A1645212E\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://uat-publicapi.paymentmanager.co.nz/api/payments/v1.0/processvoid",
+					"protocol": "https",
+					"host": [
+						"uat-publicapi",
+						"paymentmanager",
+						"co",
+						"nz"
+					],
+					"path": [
+						"api",
+						"payments",
+						"v1.0",
+						"processvoid"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
