@@ -19,21 +19,11 @@ info:
     ### Overview
     The DPG Payment Page provides a secure, PCI-compliant hosted payment solution that minimizes the compliance burden on merchants while delivering a seamless payment experience for customers.
     
-    ### How the Payment Page Functions
-    
     ![DPG Payment Page](./dpg-payment-page-screenshot.png "DPG Hosted Payment Page Interface")
     
     *The DPG hosted payment page provides a secure, user-friendly interface for collecting payment details with real-time validation and 3D Secure support.*
     
-    #### 1. Payment Page Architecture
-    The payment page is implemented through the `ProcessCreditCard.aspx` component which handles:
-    - Secure collection of payment card details
-    - Real-time payment processing
-    - 3D Secure authentication when required
-    - Transaction result handling and customer redirection
-    - Integration with multiple payment processors
-    
-    #### 2. Integration Process
+    ### Integration Process
     
     **Step 1: Generate Transaction**
     Use the [Generate Hosted Payment Transaction](#operation/generateTransaction) endpoint:
@@ -41,35 +31,24 @@ info:
     - Specify success and failure redirect URLs
     - Receive a transaction reference and payment URL
     
-    **Step 2: Customer Redirection**
+    **Step 2: Customer Payment Flow**
     - Redirect the customer to the returned `PaymentUrl`
-    - Customer is presented with a secure payment form
-    - Form is mobile-responsive and supports multiple languages
-    
-    **Step 3: Payment Processing**
-    - Customer enters card details on the hosted payment page
+    - Customer enters card details on the secure hosted page
     - Payment page validates card information in real-time
     - 3D Secure authentication is triggered when required
-    - Transaction is processed through the appropriate payment processor
+    - Customer is redirected back to merchant's success/failure URL
     
-    **Step 4: Result Handling**
-    - Upon completion, customer is redirected to merchant's success or failure URL
+    **Step 3: Verification**
+    - Verify transaction status using [Get Transaction Details](#operation/getTransactionDetails)
     - Transaction reference is passed as a parameter
-    - Merchant can verify transaction status using the [Get Transaction Details](#operation/getTransactionDetails) endpoint
     
-    #### 3. Payment Page Features
+    ### Features
     
-    **Security Features:**
+    **Security:**
     - PCI DSS Level 1 compliant hosting environment
     - SSL/TLS encryption for all communications
     - Tokenization of sensitive card data
     - 3D Secure 2.0 support for enhanced authentication
-    
-    **User Experience:**
-    - Mobile-responsive design optimized for all devices
-    - Real-time card validation and formatting
-    - Clear error messaging and user guidance
-    - Customizable styling and branding options via custom CSS
     
     **Payment Methods:**
     - Visa, Mastercard, American Express
@@ -77,104 +56,123 @@ info:
     - International and domestic card processing
     - Multi-currency support
     
-    #### 4. Integration Requirements
+    **User Experience:**
+    - Mobile-responsive design optimized for all devices
+    - Real-time card validation and formatting
+    - Clear error messaging and user guidance
+    - Customizable styling and branding options via custom CSS
+    
+    ### Configuration Requirements
     
     **Prerequisites:**
     - Active DPG merchant account
     - Merchant credentials (Username, Password, MerchantNumber, MerchantAccessCode)
     - SSL-enabled website for success/failure redirects
     
-    **Configuration Parameters:**
-    - `PaymentMode`: Set to "INTERNET" for web-based transactions or "MOTO" for Mail Order/Telephone Order transactions
-    - `PaymentType`: Typically "StandardPay" for standard payment processing
+    **Parameters:**
+    - `PaymentMode`: "INTERNET" for web-based transactions or "MOTO" for Mail Order/Telephone Order transactions
+    - `PaymentType`: "StandardPay" for standard payment processing
     - `Locale`: Language preference (en, fr, de, es, etc.)
     - `MerchantSuccessUrl`: URL for successful payment redirects
     - `MerchantFailUrl`: URL for failed payment redirects
     
-    #### 5. Transaction Flow
+    ### Custom CSS Styling
     
-    ```
-    Merchant Website → Generate Transaction → Payment Page → Payment Processing → Result → Merchant Website
-    ```
+    The DPG payment page (`ProcessCreditCard.aspx`) supports custom CSS styling to match your brand identity. Custom CSS is configured as a merchant-specific setting in the DPG system and can modify colors, fonts, layouts, and other visual elements while maintaining security standards.
     
-    1. **Initiation**: Customer initiates checkout on merchant website
-    2. **Generation**: Merchant calls the [Generate Transaction](#operation/generateTransaction) endpoint
-    3. **Redirection**: Customer is redirected to DPG payment page
-    4. **Payment**: Customer completes payment on secure hosted page
-    5. **Processing**: Transaction is processed in real-time
-    6. **Authentication**: 3D Secure authentication if required
-    7. **Completion**: Customer is redirected back to merchant website
-    8. **Verification**: Merchant verifies transaction status using [Get Transaction Details](#operation/getTransactionDetails)
-    
-    #### 6. Error Handling
-    
-    The payment page handles various error scenarios:
-    - Invalid card details with specific error messages
-    - Insufficient funds notifications
-    - 3D Secure authentication failures
-    - Network connectivity issues
-    - Payment processor downtime
-    
-    All errors are presented to the customer with clear, actionable messages, and the merchant is notified through the failure URL redirection.
-    
-    #### 7. Testing and Development
-    
-    **Test Environment:**
-    - Dedicated testing URLs and credentials
-    - Test card numbers for various scenarios
-    - Sandbox mode for integration testing
-    - Detailed transaction logs for debugging
-    
-    **Integration Testing Checklist:**
-    - Successful payment flows
-    - Failed payment scenarios
-    - 3D Secure authentication flows
-    - Timeout and error handling
-    - Mobile device compatibility
-    - Multi-currency transactions
-    
-    #### 8. Custom CSS Styling
-    
-    The DPG payment page (`ProcessCreditCard.aspx`) supports custom CSS styling to match your brand identity and provide a seamless customer experience.
-    
-    **How Custom CSS Works:**
-    - Custom CSS is configured as a merchant-specific setting in the DPG system
-    - Styles are applied to the hosted payment page to customize appearance
-    - CSS can modify colors, fonts, layouts, and other visual elements
-    - Changes are applied consistently across all payment page instances for your merchant account
-    
-    **Implementation Process:**
-    1. **Develop CSS**: Create custom CSS styles that align with your brand guidelines
-    2. **Testing**: Test styles thoroughly across different browsers and devices
-    3. **Submission**: Provide the CSS file to Datacom for review and validation
-    4. **Configuration**: Datacom uploads and configures the CSS against your merchant account
-    5. **Deployment**: Custom styles are applied to your payment page in production
-    
-    **CSS Guidelines:**
-    - Ensure styles are responsive and work across mobile and desktop devices
-    - Test compatibility with major browsers (Chrome, Firefox, Safari, Edge)
-    - Maintain accessibility standards for users with disabilities
-    - Avoid styles that might interfere with payment form functionality
-    - Consider different screen sizes and orientations
-    
-    **Merchant Configuration:**
-    - Custom CSS is configured as a merchant-level setting in DPG
-    - Each merchant can have unique styling while maintaining security standards
-    - CSS updates require resubmission through Datacom support
-    - Changes are typically configuration updates and do not require code changes on your end
-    
-    #### 9. Best Practices
+    ### Best Practices
     
     - Always validate transaction status after customer return using [Get Transaction Details](#operation/getTransactionDetails)
     - Implement proper timeout handling for payment page redirects
     - Use unique order references for each transaction
-    - Store transaction references for reconciliation
-    - Implement proper error handling for network failures
     - Test thoroughly across different browsers and devices
-    - Monitor transaction success rates and optimize accordingly
+    - Monitor transaction success rates
     - Consider using [Process Refund](#operation/processRefund) for handling refund requests
     - For direct payment integration (bypassing hosted page), see [Process Card Payment](#operation/processPayment)
     - Use [Tokenize Card Details](#operation/processTokeniseCard) for secure storage of payment methods
+    
+    ## POLi Integration
+    
+    ### Overview
+    POLi is a secure online banking payment method that allows customers to pay directly from their bank account. The DPG payment gateway provides seamless integration with POLi through the `ProcessPoliPayment.aspx` hosted payment page.
+    
+    ![POLi Login Screen](./poli-dpg.png "POLi Bank Selection Interface")
+    
+    *The POLi interface provides a secure bank selection and login experience for customers to complete their payments.*
+    
+    ### Integration Process
+    
+    **Step 1: Generate Transaction**
+    Use the [Generate Hosted Payment Transaction](#operation/generateTransaction) endpoint with POLi configuration:
+    - Set `PaymentType` to "StandardPay"
+    - Specify success and failure redirect URLs
+    - Receive transaction reference and POLi payment URL
+    
+    **Step 2: Customer Payment Flow**
+    - Customer is redirected to POLi's bank selection interface
+    - Customer selects their bank and authenticates
+    - Payment is processed in real-time through the bank
+    - Customer is redirected back to merchant's success/failure URL
+    
+    **Step 3: Verification**
+    - Verify transaction status using [Get Transaction Details](#operation/getTransactionDetails)
+    - Transaction reference is passed as a parameter
+    
+    ### Features
+    
+    **Supported Banks:**
+    - **New Zealand**: ANZ, ASB, BNZ, Kiwibank, TSB Bank, Westpac
+    
+    **Benefits:**
+    - Real-time payment processing
+    - Lower transaction fees compared to card payments
+    - Bank-level security and authentication
+    
+    ### Configuration Requirements
+    
+    **Prerequisites:**
+    - Active DPG merchant account with POLi enabled
+    - Merchant credentials (Username, Password, MerchantNumber, MerchantAccessCode)
+    - SSL-enabled website for success/failure redirects
+    
+    **Parameters:**
+    - `PaymentMode`: "INTERNET"
+    - `PaymentType`: "StandardPay"
+    - `InputCurrency`: "AUD" or "NZD"
+    - `MerchantSuccessUrl`: URL for successful payment redirects
+    - `MerchantFailUrl`: URL for failed payment redirects
+    
+    ### Transaction Status Codes
+    
+    POLi transactions return specific status codes in the DPG Message field:
+    
+    | POLi Status | DPG Message | TransStatusCode | Description |
+    |-------------|-------------|-----------------|-------------|
+    | Completed | Completed | SUCS | Payment completed successfully |
+    | TimedOut | TimedOut | FAIL | Transaction timed out |
+    | Failed | Failed | FAIL | Payment failed (insufficient funds, etc.) |
+    | Initiated | Initiated | INIT | Payment initiated but not yet completed |
+    | ReceiptUnverified | ReceiptUnverified | FAIL | Payment receipt could not be verified |
+    | Cancelled | Cancelled | FAIL | Customer cancelled the payment |
+    | Declined | Declined | FAIL | Payment was declined by the bank |
+    | Pending | Pending | INIT | Payment is being processed |
+    | Error | Error | FAIL | System error occurred during processing |
+    
+    ### Best Practices
+    
+    - Always validate transaction status after customer return
+    - Implement proper timeout handling (10 minutes)
+    - Use unique order references for each transaction
+    - Test thoroughly across different banks and devices
+    - Monitor transaction success rates
+    - Provide clear instructions to customers about the POLi process
+    
+    ### Security
+    
+    - No banking credentials are stored by DPG or POLi
+    - All communications are encrypted using SSL/TLS
+    - Real-time fraud detection and prevention
+    - Compliance with banking security standards
     
     ## Authentication
     
