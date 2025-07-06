@@ -91,6 +91,17 @@ info:
     - For direct payment integration (bypassing hosted page), see [Process Card Payment](#operation/processPayment)
     - Use [Tokenize Card Details](#operation/processTokeniseCard) for secure storage of payment methods
     
+    ### Testing 3D Secure
+    
+    To test 3D Secure authentication flows, refer to the [Mastercard 3DS Test Guide](https://ap-gateway.mastercard.com/api/documentation/integrationGuidelines/supportedFeatures/pickAdditionalFunctionality/authentication/3DS/test_your_integration.html?locale=en_US) for comprehensive testing scenarios and test card numbers.
+    
+    **Key Testing Areas:**
+    - Successful 3DS authentication flows
+    - Failed authentication scenarios
+    - Timeout and error handling
+    - Different authentication methods (SMS, app-based, etc.)
+    - Mobile and desktop browser testing
+    
     ## POLi Integration
     
     ### Overview
