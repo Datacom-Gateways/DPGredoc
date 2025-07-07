@@ -29,10 +29,11 @@ info:
     Use the [Generate Hosted Payment Transaction](#operation/generateTransaction) endpoint:
     - Create a payment transaction with amount, currency, and merchant details
     - Specify success and failure redirect URLs
-    - Receive a transaction reference and payment URL
+    - Receive a transaction reference
     
     **Step 2: Customer Payment Flow**
-    - Redirect the customer to the returned `PaymentUrl`
+    - Construct the payment URL using the transaction reference: `https://publicapi.paymentmanager.co.nz/ProcessCreditCard.aspx?TransactionId={TransactionReference}`
+    - Redirect the customer to the constructed payment URL
     - Customer enters card details on the secure hosted page
     - Payment page validates card information in real-time
     - 3D Secure authentication is triggered when required
@@ -117,9 +118,11 @@ info:
     Use the [Generate Hosted Payment Transaction](#operation/generateTransaction) endpoint with POLi configuration:
     - Set `PaymentType` to "StandardPay"
     - Specify success and failure redirect URLs
-    - Receive transaction reference and POLi payment URL
+    - Receive transaction reference
     
     **Step 2: Customer Payment Flow**
+    - Construct the POLi payment URL using the transaction reference: `https://publicapi.paymentmanager.co.nz/ProcessPoliPayment.aspx?TransactionId={TransactionReference}`
+    - Redirect customer to the constructed POLi payment URL
     - Customer is redirected to POLi's bank selection interface
     - Customer selects their bank and authenticates
     - Payment is processed in real-time through the bank
@@ -196,8 +199,8 @@ info:
     
     ## Base URL
     
-    **Production**: `https://publicapi.paymentmanager.co.nz//api/payments/v1.0`
-    **Testing**: `https://uat-publicapi.paymentmanager.co.nz//api/payments/v1.0`
+    - **Production**: `https://publicapi.paymentmanager.co.nz/api/payments/v1.0`
+    - **Testing**: `https://uat-publicapi.paymentmanager.co.nz/api/payments/v1.0`
     
     ## Error Reference
     
@@ -205,9 +208,9 @@ info:
     
     ### Response Fields
     
-    **TransStatusCode** - Transaction status indicating processing outcome
-    **Message** - Human-readable description of the transaction result  
-    **TxnResponseCode** - Numeric response code from payment processor
+    - **TransStatusCode** - Transaction status indicating processing outcome
+    - **Message** - Human-readable description of the transaction result  
+    - **TxnResponseCode** - Numeric response code from payment processor
     
     ### TransStatusCode Values
     
@@ -250,7 +253,7 @@ info:
     
     ## Integration Support
     
-    For integration assistance, contact the Datacom Payment Gateway support team.
+    For integration assistance, contact the Datacom Payment Gateway support team at **support@datacomgateway.com**.
     
     **Testing Resources:**
     - **Postman Collection**: A comprehensive Postman collection is available (`DPG UAT - REST API Version 1.0 - API docs version.postman_collection.json`) containing pre-configured requests for all API endpoints
@@ -263,11 +266,8 @@ info:
     altText: Datacom Logo
   contact:
     name: Datacom Payment Gateway Support
-    url: https://www.datacom.com
-    email: support@datacom.com
-  license:
-    name: Proprietary
-    url: https://www.datacom.com/terms
+    email: support@datacomgateway.com
+  termsOfService: https://datacom.com/nz/en/legal/terms-of-use
 servers:
   - url: https://your-dpg-domain.com/api/payments/v1.0
     description: Production server
@@ -361,10 +361,11 @@ paths:
         
         **Process:**
         1. Call this endpoint to generate a transaction
-        2. Redirect customer to the returned payment URL
-        3. Customer completes payment on hosted page
-        4. Customer is redirected back to your success/failure URL
-        5. Use transaction lookup endpoints to verify payment status
+        2. Construct the payment URL using the returned transaction reference: `https://publicapi.paymentmanager.co.nz/ProcessCreditCard.aspx?TransactionId={TransactionReference}`
+        3. Redirect customer to the constructed payment URL
+        4. Customer completes payment on hosted page
+        5. Customer is redirected back to your success/failure URL
+        6. Use transaction lookup endpoints to verify payment status
       operationId: generateTransaction
       requestBody:
         required: true
@@ -393,6 +394,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RestAPIGenerateTransactionResponse'
+              example:
+                TransactionReference: "36C4A4C2B8CD49A4BEDD3CD123DED01E"
+                DPGErrorCode: null
+                DPGErrorDescription: null
         '400':
           description: Bad request - validation errors
         '401':
@@ -1492,19 +1497,16 @@ components:
           type: string
           description: Generated transaction reference
           example: "36C4A4C2B8CD49A4BEDD3CD123DED01E"
-        PaymentUrl:
-          type: string
-          format: uri
-          description: URL for customer to complete payment
-          example: "https://payments.dpg.com/hosted/?ref=36C4A4C2B8CD49A4BEDD3CD123DED01E"
         DPGErrorCode:
           type: string
-          description: Error code (0 = success)
-          example: "0"
+          nullable: true
+          description: Error code (null when successful, populated when error occurs)
+          example: null
         DPGErrorDescription:
           type: string
-          description: Error description
-          example: "Success"
+          nullable: true
+          description: Error description (null when successful, populated when error occurs)
+          example: null
 
     APIPaginatedTransactionsResponse:
       type: object
