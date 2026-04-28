@@ -1,0 +1,46 @@
+name: Generate SBOM (.NET Framework)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  sbom:
+    runs-on: windows-latest  # Must be Windows for .NET Framework
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Install CycloneDX .NET tool
+        run: dotnet tool install --global CycloneDX
+
+      - name: Add .NET global tools to PATH
+        run: |
+          $dotnetToolsPath = "$env:USERPROFILE\.dotnet\tools"
+          echo "Adding $dotnetToolsPath to PATH"
+          $env:PATH = "$dotnetToolsPath;$env:PATH"
+          echo "$dotnetToolsPath" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Verify CycloneDX installation
+        run: |
+          cyclonedx --version
+          Write-Host "CycloneDX tool is available"
+
+      - name: Restore NuGet packages
+        run: nuget restore DatacomPaymentGateway/MAIN/DatacomPaymentGateway.sln
+
+      - name: Generate SBOM
+        run: cyclonedx . -o sbom.json -j
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.json 

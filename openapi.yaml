@@ -2,8 +2,6 @@ openapi: 3.0.3
 info:
   title: Datacom Payment Gateway (DPG) REST API
   description: |
-    # Datacom Payment Gateway API v1.0
-  
     ## Overview
     
     The DPG API supports a wide range of payment operations including:
@@ -269,14 +267,10 @@ info:
     email: support@datacomgateway.com
   termsOfService: https://datacom.com/nz/en/legal/terms-of-use
 servers:
-  - url: https://your-dpg-domain.com/api/payments/v1.0
+  - url: https://publicapi.paymentmanager.co.nz/api/payments/v1.0
     description: Production server
-  - url: https://test-dpg-domain.com/api/payments/v1.0
+  - url: https://uat-publicapi.paymentmanager.co.nz/api/payments/v1.0
     description: Testing server
-
-externalDocs:
-  description: Postman Collection for API Testing
-  url: ./DPG%20UAT%20-%20REST%20API%20Version%201.0%20-%20API%20docs%20version.postman_collection.json
 
 paths:
   /processpayment:
@@ -1411,65 +1405,164 @@ components:
 
     APIPaymentResponse:
       type: object
+      description: |
+        Payment or transaction-detail payload returned by payment processing endpoints and
+        [Get Transaction Details](#operation/getTransactionDetails). Field names use PascalCase as in the API.
+        Empty or null-valued fields are often omitted from JSON responses.
       properties:
-        TransactionReference:
-          type: string
-          description: Unique transaction reference
-          example: "36C4A4C2B8CD49A4BEDD3CD123DED01E"
-        TransStatusCode:
-          type: string
-          description: Transaction status code
-          example: "0"
-        TransactionType:
-          type: string
-          description: Type of transaction processed
-          example: "Payment"
-        TokenMethod:
-          type: string
-          description: Token method used
-          example: "None"
-        PaymentType:
-          type: string
-          description: Payment type
-          example: "StandardPay"
-        ProductType:
-          type: string
-          description: Product type
-          example: "Standard"
-        TransAmount:
+        Amount:
           type: number
           format: decimal
           description: Transaction amount
-          example: 1.00
-        InputCurrency:
-          type: string
-          description: Transaction currency
-          example: "NZD"
+          example: 1.0
         OrderInfo:
           type: string
-          description: Order information
+          description: Merchant order reference
           maxLength: 40
-          example: "Order-123456789"
+        PaymentType:
+          type: string
+          description: Payment type (e.g. StandardPay)
+          example: "StandardPay"
+        ProductType:
+          type: string
+          description: Product type (e.g. RTCv1)
+        SwitchEngine:
+          type: string
+          description: Payment switch engine identifier (e.g. MPGS)
+        TokenMethod:
+          type: string
+          description: Tokenisation method used for the transaction
+          example: "DoNotTokenise"
+        TransCompleteTime:
+          type: string
+          format: date-time
+          description: Time processing completed (server local / ISO-like string as returned by the API)
+        TransSourceIP:
+          type: string
+          description: Client IP recorded for the transaction
+        TransStartTime:
+          type: string
+          format: date-time
+          description: Time processing started
+        TransactionNo:
+          type: integer
+          format: int64
+          description: Full transaction number (includes suffix digits compared to TransactionID)
+        TransactionReference:
+          type: string
+          description: Unique transaction reference (GUID)
+        TransactionType:
+          type: string
+          description: Transaction type (e.g. Pay, Refund)
+          example: "Pay"
+        AcqResponseCode:
+          type: string
+          description: Acquirer response code
+          example: "00"
+        AuthoriseId:
+          type: string
+          description: Authorisation identifier from the acquirer
+        BatchNo:
+          type: integer
+          format: int32
+          description: Settlement batch number (often yyyymmdd form)
+        CardExpiry:
+          type: string
+          description: Card expiry (MMYY or as returned by the gateway)
+        CardName:
+          type: string
+          description: Name on card
+        CardNumber:
+          type: string
+          description: Masked card number
+        CardType:
+          type: string
+          description: Card scheme short code (e.g. VC)
+        CardFundingMethod:
+          type: string
+          description: Card funding method (e.g. DEBIT, CREDIT)
+        ClientTransData1:
+          type: string
+        ClientTransData2:
+          type: string
+        ClientTransData3:
+          type: string
+        ClientTransData4:
+          type: string
+        ClientTransData5:
+          type: string
+        ClientTransData6:
+          type: string
+        ClientTransData7:
+          type: string
+        ClientTransData8:
+          type: string
+        ClientTransData9:
+          type: string
+        ClientTransData10:
+          type: string
+        MerchTxnRef:
+          type: string
+          description: Merchant transaction reference (may include attempt suffix)
+        MerchantFailUrl:
+          type: string
+          description: Merchant-configured failure redirect URL
         MerchantNumber:
           type: string
           description: Merchant identifier
-          example: "YOUR_MERCHANT_NUMBER"
-        TransactionTime:
+        MerchantSuccessUrl:
           type: string
-          format: date-time
-          description: Transaction processing time
-          example: "2023-01-01T12:00:00Z"
+          description: Merchant-configured success redirect URL
+        Message:
+          type: string
+          description: Human-readable gateway message (e.g. Approved)
+        ReceiptNo:
+          type: string
+          description: Receipt number
+        TransStatusCode:
+          type: string
+          description: Transaction status code (e.g. SUCS, INIT, FAIL)
+          example: "SUCS"
+        TransactionID:
+          type: integer
+          format: int64
+          description: Internal transaction identifier (base id)
+        TxnResponseCode:
+          type: string
+          description: Gateway transaction response code (e.g. APPROVED)
+        AvsResultCode:
+          type: string
+          description: Address Verification Service result code
+        AvsResultCodeDescription:
+          type: string
+        CscResultCode:
+          type: string
+          description: Card Security Code verification result code
+        CscResultCodeDescription:
+          type: string
+        Secure3DHtmlContent:
+          type: string
+          description: 3DS challenge HTML when applicable
+        SecureHash:
+          type: string
+        Token:
+          type: string
+          description: Token value when tokenisation applies; may contain an error message in edge cases
+        TxnResponseCodeDescription:
+          type: string
+        Version:
+          type: string
+        Command:
+          type: string
         DPGErrorCode:
           type: string
-          description: DPG-specific error code
-          example: "0"
+          description: Present when the gateway returns an application-level error
         DPGErrorDescription:
           type: string
-          description: DPG-specific error description
-          example: "Success"
+          description: Error detail when DPGErrorCode is set
         AuthenticationPayerInteraction:
           type: string
-          description: 3DS payer interaction status
+          description: 3DS payer interaction (populated when relevant)
         AuthenticationStatus:
           type: string
           description: 3DS authentication status
@@ -1482,13 +1575,6 @@ components:
         AuthenticationGatewayRecommendation:
           type: string
           description: 3DS gateway recommendation
-        CardFundingMethod:
-          type: string
-          description: Card funding method (debit/credit)
-        Token:
-          type: string
-          description: Generated token (for tokenization requests)
-          example: "6729011452840008"
 
     RestAPIGenerateTransactionResponse:
       type: object
@@ -1538,42 +1624,115 @@ components:
 
     PaginatedTransactionDetails:
       type: object
+      description: |
+        One row from [Get Paginated Transaction List](#operation/getTransactions) `Data` array.
+        Same general shape as a successful payment detail response but without per-row DPG error or 3DS authentication extension fields.
       properties:
-        TransactionReference:
-          type: string
-          description: Transaction reference
-          example: "36C4A4C2B8CD49A4BEDD3CD123DED01E"
-        TransAmount:
+        Amount:
           type: number
           format: decimal
-          description: Transaction amount
-          example: 1.00
-        InputCurrency:
-          type: string
-          description: Transaction currency
-          example: "NZD"
         OrderInfo:
           type: string
-          description: Order information
           maxLength: 40
-          example: "Order-123456789"
-        TransactionTime:
-          type: string
-          format: date-time
-          description: Transaction time
-          example: "2023-01-01T12:00:00Z"
-        TransStatusCode:
-          type: string
-          description: Transaction status code
-          example: "0"
-        TransactionType:
-          type: string
-          description: Transaction type
-          example: "Payment"
         PaymentType:
           type: string
-          description: Payment type
-          example: "StandardPay"
+        ProductType:
+          type: string
+        SwitchEngine:
+          type: string
+        TokenMethod:
+          type: string
+        TransCompleteTime:
+          type: string
+          format: date-time
+        TransSourceIP:
+          type: string
+        TransStartTime:
+          type: string
+          format: date-time
+        TransactionNo:
+          type: integer
+          format: int64
+        TransactionReference:
+          type: string
+        TransactionType:
+          type: string
+        AcqResponseCode:
+          type: string
+        AuthoriseId:
+          type: string
+        BatchNo:
+          type: integer
+          format: int32
+        CardExpiry:
+          type: string
+        CardName:
+          type: string
+        CardNumber:
+          type: string
+        CardType:
+          type: string
+        CardFundingMethod:
+          type: string
+        ClientTransData1:
+          type: string
+        ClientTransData2:
+          type: string
+        ClientTransData3:
+          type: string
+        ClientTransData4:
+          type: string
+        ClientTransData5:
+          type: string
+        ClientTransData6:
+          type: string
+        ClientTransData7:
+          type: string
+        ClientTransData8:
+          type: string
+        ClientTransData9:
+          type: string
+        ClientTransData10:
+          type: string
+        MerchTxnRef:
+          type: string
+        MerchantFailUrl:
+          type: string
+        MerchantNumber:
+          type: string
+        MerchantSuccessUrl:
+          type: string
+        Message:
+          type: string
+        ReceiptNo:
+          type: string
+        TransStatusCode:
+          type: string
+        TransactionID:
+          type: integer
+          format: int64
+        TxnResponseCode:
+          type: string
+        AvsResultCode:
+          type: string
+        AvsResultCodeDescription:
+          type: string
+        CscResultCode:
+          type: string
+        CscResultCodeDescription:
+          type: string
+        Secure3DHtmlContent:
+          type: string
+        SecureHash:
+          type: string
+        Token:
+          type: string
+        TxnResponseCodeDescription:
+          type: string
+        Version:
+          type: string
+        Command:
+          type: string
 
   securitySchemes:
     MerchantAuth:
